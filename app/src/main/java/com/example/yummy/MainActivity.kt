@@ -3,45 +3,54 @@ package com.example.yummy
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.yummy.ui.theme.YummyTheme
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
-            YummyTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
+            val navController = rememberNavController()
+            NavHost(navController, startDestination = "HomeScreen", builder = {
+                composable(
+                    "HomeScreen"){
+                    HomeScreen(navController)
+                }
+                composable(
+                    "foodDetail/{foodName}/{foodPrice}/{foodDescription}/{foodImage}",
+                    arguments = listOf(
+                        navArgument("foodName") { type = NavType.StringType},
+                        navArgument("foodPrice") { type = NavType.StringType },
+                        navArgument("foodDescription") { type = NavType.StringType },
+                        navArgument("foodImage") { type = NavType.IntType }
+                    )
+                ){ backStackEntry ->
+                    val foodName = backStackEntry.arguments?.getString("foodName").orEmpty()
+                    val foodPrice = backStackEntry.arguments?.getString("foodPrice").orEmpty()
+                    val foodDescription = backStackEntry.arguments?.getString("foodDescription").orEmpty()
+                    val foodImage = backStackEntry.arguments?.getInt("foodImage") ?: R.drawable.food_image
+
+                    FoodDetail(
+                        onBackClicked = { navController.popBackStack() },
+                        foodImage = foodImage,
+                        foodName = foodName,
+                        foodPrice = foodPrice,
+                        foodDescription = foodDescription
                     )
                 }
-            }
+            })
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    YummyTheme {
-        Greeting("Android")
-    }
+fun HomeScreenPreview(){
+    val navController = rememberNavController()
+    HomeScreen(navController = navController)
 }
