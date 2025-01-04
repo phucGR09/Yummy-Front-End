@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".ProfileShipperActivity">
+
+    <!-- Icon quay lại -->
+    <ImageView
+        android:id="@+id/icon_back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:src="@drawable/back"
+        android:contentDescription="Quay lại"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Ảnh đại diện -->
+    <ImageView
+        android:id="@+id/avatar_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/face"
+        app:layout_constraintTop_toBottomOf="@id/icon_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Icon thay đổi ảnh -->
+    <ImageView
+        android:id="@+id/change_photo_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/camera"
+        app:layout_constraintEnd_toEndOf="@id/avatar_image"
+        app:layout_constraintBottom_toBottomOf="@id/avatar_image" />
+
+    <!-- Tên người dùng -->
+    <TextView
+        android:id="@+id/text_user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TRẦN HOÀI AN"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/avatar_image"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Vai trò -->
+    <TextView
+        android:id="@+id/text_role"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="QUẢN LÝ HỒ SƠ NGƯỜI GIAO HÀNG"
+        android:textColor="@color/light_gray"
+        android:textSize="14sp"
+        app:layout_constraintTop_toBottomOf="@id/text_user_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Họ và tên -->
+    <TextView
+        android:id="@+id/label_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Họ và tên"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/text_role"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <EditText
+        android:id="@+id/edit_text_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Nhập họ và tên"
+        android:background="@drawable/frame_1"
+        android:padding="16dp"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/label_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <!-- Email -->
+    <TextView
+        android:id="@+id/label_email"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="E-mail"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/edit_text_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <EditText
+        android:id="@+id/edit_text_email"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Nhập e-mail"
+        android:background="@drawable/frame_1"
+        android:padding="16dp"
+        android:inputType="textEmailAddress"
+        android:enabled="false"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/label_email"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <!-- Số điện thoại -->
+    <TextView
+        android:id="@+id/label_phone"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Số điện thoại"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/edit_text_email"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <EditText
+        android:id="@+id/edit_text_phone"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Nhập số điện thoại"
+        android:background="@drawable/frame_1"
+        android:padding="16dp"
+        android:inputType="phone"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/label_phone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <!-- Địa chỉ -->
+    <TextView
+        android:id="@+id/label_address"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Địa chỉ"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/edit_text_phone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <EditText
+        android:id="@+id/edit_text_address"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Nhập địa chỉ"
+        android:background="@drawable/frame_1"
+        android:padding="16dp"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/label_address"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <!-- CCCD -->
+    <TextView
+        android:id="@+id/label_cccd"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="CCCD"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/edit_text_address"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <Button
+        android:id="@+id/button_upload_cccd"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Tải ảnh CCCD"
+        android:backgroundTint="@color/light_gray"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/label_cccd"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <!-- Giấy phép lái xe -->
+    <TextView
+        android:id="@+id/label_license"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Giấy phép lái xe"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/button_upload_cccd"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <Button
+        android:id="@+id/button_upload_license"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Tải ảnh giấy phép lái xe"
+        android:backgroundTint="@color/light_gray"
+        android:textColor="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/label_license"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <!-- Nút lưu -->
+    <Button
+        android:id="@+id/button_save"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="52dp"
+        android:backgroundTint="@color/orange"
+        android:text="LƯU"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.609"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_upload_license"
+        app:layout_constraintWidth_percent="0.9" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

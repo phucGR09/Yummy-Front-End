@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".SignUpActivity">
+
+    <!-- Tiêu đề -->
+
+    <!-- Label: Họ và Tên -->
+
+    <!-- Họ và Tên -->
+
+    <TextView
+        android:id="@+id/sign_up_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="44dp"
+        android:text="ĐĂNG KÝ"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.464"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/label_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Họ và tên"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.487"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sign_up_title"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <EditText
+        android:id="@+id/edit_text_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Nhập họ và tên"
+        android:background="@drawable/frame_1"
+        android:padding="16dp"
+        android:textColorHint="@color/light_gray"
+        app:layout_constraintTop_toBottomOf="@id/label_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <!-- Label: Email/SĐT -->
+    <TextView
+        android:id="@+id/label_email"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="E-mail/SĐT"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/edit_text_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <!-- Email/SĐT -->
+    <EditText
+        android:id="@+id/edit_text_email"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Nhập email hoặc SĐT"
+        android:background="@drawable/frame_1"
+        android:padding="16dp"
+        android:textColorHint="@color/light_gray"
+        app:layout_constraintTop_toBottomOf="@id/label_email"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <!-- Label: Mật khẩu -->
+    <TextView
+        android:id="@+id/label_password"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Mật khẩu"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/edit_text_email"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <!-- Mật khẩu -->
+    <EditText
+        android:id="@+id/edit_text_password"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Nhập mật khẩu"
+        android:background="@drawable/frame_1"
+        android:inputType="textPassword"
+        android:padding="16dp"
+        android:textColorHint="@color/light_gray"
+        app:layout_constraintTop_toBottomOf="@id/label_password"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <!-- Label: Nhập lại mật khẩu -->
+    <TextView
+        android:id="@+id/label_confirm_password"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Nhập lại mật khẩu"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/edit_text_password"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <!-- Nhập lại mật khẩu -->
+    <EditText
+        android:id="@+id/edit_text_confirm_password"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Nhập lại mật khẩu"
+        android:background="@drawable/frame_1"
+        android:inputType="textPassword"
+        android:padding="16dp"
+        android:textColorHint="@color/light_gray"
+        app:layout_constraintTop_toBottomOf="@id/label_confirm_password"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <!-- Nút đăng ký -->
+
+    <!-- Đường dẫn Đăng nhập -->
+
+    <Button
+        android:id="@+id/button_sign_up"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:backgroundTint="@color/orange"
+        android:text="ĐĂNG KÝ"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.487"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/radio_group_role"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <TextView
+        android:id="@+id/text_sign_in"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Bạn đã có tài khoản? "
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.402"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_sign_up" />
+
+    <ImageView
+        android:id="@+id/imageView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/decor1" />
+
+    <ImageView
+        android:id="@+id/imageView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/decor2" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Đăng nhập"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.773"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_sign_up" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Đăng nhập với"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_sign_in" />
+
+    <!-- Label: Vai trò -->
+    <ImageView
+        android:id="@+id/imageView7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.531"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView5"
+        app:srcCompat="@drawable/google" />
+
+    <TextView
+        android:id="@+id/label_role"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Vai trò"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/edit_text_confirm_password"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9" />
+
+    <!-- Group các RadioButton cho Vai trò -->
+    <RadioGroup
+        android:id="@+id/radio_group_role"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/label_role"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.9">
+
+        <RadioButton
+            android:id="@+id/radio_buyer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Người mua hàng"
+            android:textSize="14sp" />
+
+        <RadioButton
+            android:id="@+id/radio_seller"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Người bán hàng"
+            android:textSize="14sp" />
+
+        <RadioButton
+            android:id="@+id/radio_shipper"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Người giao hàng"
+            android:textSize="14sp" />
+    </RadioGroup>
+
+    <ImageView
+        android:id="@+id/imageView20"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintBottom_toBottomOf="@+id/edit_text_password"
+        app:layout_constraintEnd_toEndOf="@+id/edit_text_password"
+        app:layout_constraintTop_toBottomOf="@+id/label_password"
+        app:layout_constraintVertical_bias="0.447"
+        app:srcCompat="@drawable/eye" />
+
+    <ImageView
+        android:id="@+id/imageView21"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintBottom_toBottomOf="@+id/edit_text_confirm_password"
+        app:layout_constraintEnd_toEndOf="@+id/edit_text_confirm_password"
+        app:layout_constraintTop_toBottomOf="@+id/label_confirm_password"
+        app:layout_constraintVertical_bias="0.594"
+        app:srcCompat="@drawable/eye" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
