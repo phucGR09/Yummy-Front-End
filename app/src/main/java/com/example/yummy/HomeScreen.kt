@@ -1,6 +1,5 @@
 package com.example.yummy // Đổi thành package của bạn
 
-import android.content.ClipDescription
 import androidx.compose.foundation.* // Đảm bảo các import cần thiết
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,6 +17,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,7 +33,7 @@ fun HomeScreen(navController: NavController) {
         // Top Bar
         item{
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -46,17 +46,26 @@ fun HomeScreen(navController: NavController) {
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(
-                        text = "4102 Pretty View Lane",
+                        text = "41, Nguyễn Văn Cừ, P4,\n Q5, TPHCM",
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
-                Image(
-                    painter = painterResource(id = R.drawable.profile_placeholder),
-                    contentDescription = "Profile",
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(MaterialTheme.shapes.small)
-                )
+
+                IconButton(onClick = { navController.navigate("CartScreen") }) {
+                    Icon(
+                        imageVector = Icons.Default.ShoppingCart, // Icon giỏ hàng
+                        contentDescription = "Cart",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                IconButton(onClick = { /* TODO: Navigate to cart */ }) {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle, // Icon giỏ hàng
+                        contentDescription = "Cart",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+
             }
         }
         item{
@@ -133,22 +142,27 @@ fun HomeScreen(navController: NavController) {
 
 
         // LazyVerticalGrid for Suggested Foods
-        items(suggestedFoods.chunked(2)) { rowFoods ->
+        items(suggestedFoods.chunked(2)) { rowItems ->
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                rowFoods.forEach { food ->
-                    SuggestedFoodCard(
-                        food = food,
-                        navController = navController,
-                        modifier = Modifier.weight(1f) // This ensures each card takes up half the width
-                    )
+                rowItems.forEach { food ->
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(4.dp)
+                    ) {
+                        SuggestedFoodCard(food = food, navController = navController)
+                    }
                 }
-                if (rowFoods.size < 2) {
-                    Spacer(modifier = Modifier.weight(1f)) // Spacing to ensure proper alignment if only one item in the row
+
+                // Nếu số lượng item lẻ, thêm một Box trống để căn chỉnh
+                if (rowItems.size < 2) {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
@@ -229,7 +243,6 @@ fun RestaurantCard(restaurant: Restaurant) {
 @Composable
 fun SuggestedFoodCard(
     food: SuggestedFood,
-    modifier: Modifier = Modifier,
     navController: NavController
 ) {
     Card(
@@ -273,7 +286,7 @@ fun SuggestedFoodCard(
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
                     Text(
-                        text = food.price,
+                        text = "$${String.format(Locale.US, "%.2f", food.price)}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -299,16 +312,16 @@ data class Restaurant(
 data class SuggestedFood(
     val name: String,
     val imageResId: Int,
-    val price: String,
+    val price: Double,
     val description: String
 )
 
 val foodCategories = listOf(
-    FoodCategory("Burger", R.drawable.ic_user, Color(0xFFFF6B6B)),
-    FoodCategory("Donut", R.drawable.ic_fastfood, Color(0xFFFFBE76)),
-    FoodCategory("Pizza", R.drawable.ic_pizza, Color(0xFF4ECDC4)),
-    FoodCategory("Mexican", R.drawable.ic_hamburger, Color(0xFFFF7F50)),
-    FoodCategory("Asian", R.drawable.ic_tea, Color(0xFFB8E994))
+    FoodCategory("Rice", R.drawable.rice_bowl_icon, Color(0xFFFF6B6B)),
+    FoodCategory("Noodles", R.drawable.noodles_icon, Color(0xFFFFBE76)),
+    FoodCategory("Beverage", R.drawable.beverage_icon, Color(0xFF4ECDC4)),
+    FoodCategory("Vegetarian", R.drawable.broccoli_icon, Color(0xFFFF7F50)),
+    FoodCategory("Fast Food", R.drawable.burger_icon, Color(0xFFB8E994))
 )
 val featuredRestaurants = listOf(
     Restaurant("McDonald's", R.drawable.mcdonalds_image, 4.5, 15),
@@ -317,10 +330,10 @@ val featuredRestaurants = listOf(
 
 
 val suggestedFoods = listOf(
-    SuggestedFood("Burger", R.drawable.burger_image, "$5.99", "Delicious"),
-    SuggestedFood("Pizza", R.drawable.pizza_image, "$8.99", "Delicious"),
-    SuggestedFood("Sushi", R.drawable.sushi_image, "$12.99", "Delicious"),
-    SuggestedFood("Pasta", R.drawable.pasta_image, "$10.99", "Delicious"),
-    SuggestedFood("Salad", R.drawable.salad_image, "$6.99", "Delicious"),
-    SuggestedFood("Ice Cream", R.drawable.ice_cream_image, "$4.50", "Delicious")
+    SuggestedFood("Burger", R.drawable.burger_image, 5.99, "A hamburger, or simply a burger, is a dish consisting of fillings—usually a patty of ground meat, typically beef—placed inside a sliced bun or bread roll. \nThe patties are often served with cheese, lettuce, tomato, onion, pickles, bacon, or chilis with condiments such as ketchup, mustard, mayonnaise, relish or a \"special sauce\", often a variation of Thousand Island dressing, and are frequently placed on sesame seed buns. \nA hamburger patty topped with cheese is called a cheeseburger.\n Under some definitions, and in some cultures, a burger is considered a sandwich. \nHamburgers are typically associated with fast-food restaurants and diners but are also sold at various other restaurants, including more expensive high-end establishments. There are many international and regional variations of hamburgers. Some of the largest multinational fast-food chains feature burgers as one of their core products: McDonald's Big Mac and Burger King's Whopper have become global icons of American culture.["),
+    SuggestedFood("Pizza", R.drawable.pizza_image, 8.99, "Delicious"),
+    SuggestedFood("Sushi", R.drawable.sushi_image, 12.99, "Delicious"),
+    SuggestedFood("Pasta", R.drawable.pasta_image, 10.99, "Delicious"),
+    SuggestedFood("Salad", R.drawable.salad_image, 6.99, "Delicious"),
+    SuggestedFood("Ice Cream", R.drawable.ice_cream_image, 4.50, "Delicious")
 )
