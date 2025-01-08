@@ -1,60 +1,44 @@
 package com.example.yummy
+
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-
-data class Category(
-    val name: String,
-    val description: String?, // Mô tả danh mục (tùy chọn)
-    val order: Int, // Số thứ tự
-    val isVisible: Boolean, // Hiển thị danh mục
-    val isAvailable: Boolean, // Còn sẵn để đặt hàng
-    val dishes: MutableList<Dish> // Danh sách món ăn trong danh mục
-)
 
 data class Dish(
     val name: String,
     val price: Int,
     val description: String?, // Mô tả món ăn (tùy chọn)
-    var imagePath: String?, // Đường dẫn đến ảnh món ăn
-    var isVisible: Boolean, // Hiển thị trên thực đơn
-    var isAvailable: Boolean // Còn hàng
+    var imagePath: String? // Đường dẫn đến ảnh món ăn
 )
 
-
-
 class MenuSellerViewModel : ViewModel() {
-    private val _categories = MutableStateFlow(
+    private val _dishes = MutableStateFlow(
         listOf(
-            Category(
-                name = "Nước uống",
-                description = "Các loại nước giải khát",
-                order = 1,
-                isVisible = true,
-                isAvailable = true,
-                dishes = mutableListOf(
-                    Dish("Trà sữa", 25000, "Ngọt và ngon", null, true, true)
-                )
-            ),Category(
-                name = "Ăn vặt",
-                description = "",
-                order = 2,
-                isVisible = true,
-                isAvailable = true,
-                dishes = mutableListOf(
-                    Dish("Bánh tráng trộn", 25000, null, null, true, true)
-                )
-            )
-
+            Dish(name = "Latte", price = 50000, description = "Latte Việt Nam", imagePath = null),
+            Dish(name = "Bánh tráng trộn", price = 25000, description = null, imagePath = null),
+            Dish(name = "Matcha latte", price = 55000, description = "Matcha latte rất ngon", imagePath = null)
         )
     )
-    val categories: StateFlow<List<Category>> = _categories
+    val dishes: StateFlow<List<Dish>> = _dishes
 
-    // Thêm danh mục mới
-    fun addCategory(newCategory: Category) {
-        val updatedCategories = _categories.value.toMutableList()
-        updatedCategories.add(newCategory)
-        updatedCategories.sortBy { it.order } // Sắp xếp theo thứ tự
-        _categories.value = updatedCategories
+    // Thêm món ăn mới
+    fun addDish(newDish: Dish) {
+        val updatedDishes = _dishes.value.toMutableList()
+        updatedDishes.add(newDish)
+        _dishes.value = updatedDishes
+    }
+
+    // Cập nhật món ăn
+    fun updateDish(updatedDish: Dish) {
+        val updatedDishes = _dishes.value.map { dish ->
+            if (dish.name == updatedDish.name) updatedDish else dish
+        }
+        _dishes.value = updatedDishes
+    }
+
+    // Xóa món ăn
+    fun removeDish(dishName: String) {
+        val updatedDishes = _dishes.value.filter { it.name != dishName }
+        _dishes.value = updatedDishes
     }
 }
