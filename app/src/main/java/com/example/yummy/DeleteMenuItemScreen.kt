@@ -44,6 +44,8 @@ fun PreviewDEditDishScreen() {
 
     // Món ăn giả lập để chỉnh sửa
     val dish = Dish(
+        item_id =1,
+        restaurant_id =0,
         name = "Bánh tráng trộn",
         price = 25000,
         description = "Món ăn vặt nổi tiếng",
