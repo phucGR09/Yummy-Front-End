@@ -1,7 +1,7 @@
 package com.example.yummy.network
 
 import com.example.yummy.api.UserApi
-import com.example.yummy.network.api.RestaurantApi
+import com.example.yummy.api.RestaurantApi
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -9,7 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object RetrofitInstance {
 
     // Địa chỉ của API (thay đổi phù hợp với backend của bạn)
-    private const val BASE_URL = "https://your-backend-url.com/"
+    private const val BASE_URL = "http://localhost:8080/"
 
     // Tạo Retrofit instance
     private val retrofit by lazy {

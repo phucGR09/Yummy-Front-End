@@ -1,4 +1,4 @@
-package com.example.yummy.network.api
+package com.example.yummy.api
 
 import com.example.yummy.models.ApiResponse
 import com.example.yummy.models.RestaurantResponse
