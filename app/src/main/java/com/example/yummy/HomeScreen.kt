@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,152 +19,182 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavDeepLinkSaveStateControl
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
-
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp)
-    ) {
-        // Top Bar
-        item{
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = {}) {
-                    Icon(Icons.Default.Menu, "Menu")
-                }
-                Column {
-                    Text(
-                        text = "Deliver to",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    Text(
-                        text = "41, Nguyễn Văn Cừ, P4,\n Q5, TPHCM",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-
-                IconButton(onClick = { navController.navigate("CartScreen") }) {
-                    Icon(
-                        imageVector = Icons.Default.ShoppingCart, // Icon giỏ hàng
-                        contentDescription = "Cart",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-                IconButton(onClick = { /* TODO: Navigate to cart */ }) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle, // Icon giỏ hàng
-                        contentDescription = "Cart",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-            }
-        }
-        item{
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "What would you like to order?",
-                style = MaterialTheme.typography.headlineSmall
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        item {
-            // Search Bar
-            SearchBar(
-                query = searchQuery,
-                onQueryChange = { searchQuery = it },
-                onSearch = {},
-                active = false,
-                onActiveChange = {},
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Find for food or restaurant...") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") }
-            ) {
-                // Content here - required parameter
-            }
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Food Categories
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(foodCategories) { category ->
-                    FoodCategoryItem(category)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-        }
-
-        item {
-            // Featured Restaurants Section
-            Text(
-                text = "Featured Restaurants",
-                style = MaterialTheme.typography.titleLarge
-            )
-
-            LazyRow(
-                modifier = Modifier.padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(featuredRestaurants) { restaurant ->
-                    RestaurantCard(restaurant)
-                }
-            }
-        }
-
-        item {
-            // recommend food
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Title for Suggested Foods
-            Text(
-                text = "Suggested Foods",
-                style = MaterialTheme.typography.titleLarge
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-
-        // LazyVerticalGrid for Suggested Foods
-        items(suggestedFoods.chunked(2)) { rowItems ->
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                rowItems.forEach { food ->
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(4.dp)
+    Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            bottomBar = {
+                BottomAppBar(
+                    modifier = Modifier
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(16.dp)),
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly // Đảm bảo cách đều
                     ) {
-                        SuggestedFoodCard(food = food, navController = navController)
+                        IconButton(onClick = { navController.navigate("HomeScreen") }) {
+                            Icon(Icons.Default.Home, contentDescription = "Home", Modifier.size(30.dp))
+                        }
+                        IconButton(onClick = { navController.navigate("About") }) {
+                            Icon(Icons.AutoMirrored.Filled.List, contentDescription = "About", Modifier.size(30.dp))
+                        }
+                        IconButton(onClick = { navController.navigate("Favorite") }) {
+                            Icon(Icons.Default.Favorite, contentDescription = "Favorite", Modifier.size(30.dp))
+                        }
+                    }
+                }
+           },
+        )
+    { valuePadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(start = 16.dp, end = 16.dp)
+                .padding(valuePadding)
+        ) {
+            // Top Bar
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = {}) {
+                        Icon(Icons.Default.Menu, "Menu")
+                    }
+                    Column {
+                        Text(
+                            text = "Deliver to",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Text(
+                            text = "41, Nguyễn Văn Cừ, P4,\n Q5, TPHCM",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+
+                    IconButton(onClick = { navController.navigate("CartScreen") }) {
+                        Icon(
+                            imageVector = Icons.Default.ShoppingCart, // Icon giỏ hàng
+                            contentDescription = "Cart",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    IconButton(onClick = { navController.navigate("UserProfile") }) {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle, // Icon giỏ hàng
+                            contentDescription = "Account",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                }
+            }
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = "What would you like to order?",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
+                // Search Bar
+                SearchBar(
+                    query = searchQuery,
+                    onQueryChange = { searchQuery = it },
+                    onSearch = {},
+                    active = false,
+                    onActiveChange = {},
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Find for food or restaurant...") },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") }
+                ) {
+                    // Content here - required parameter
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Food Categories
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(foodCategories) { category ->
+                        FoodCategoryItem(category)
                     }
                 }
 
-                // Nếu số lượng item lẻ, thêm một Box trống để căn chỉnh
-                if (rowItems.size < 2) {
-                    Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            item {
+                // Featured Restaurants Section
+                Text(
+                    text = "Featured Restaurants",
+                    style = MaterialTheme.typography.titleLarge
+                )
+
+                LazyRow(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(featuredRestaurants) { restaurant ->
+                        RestaurantCard(restaurant)
+                    }
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
+
+            item {
+                // recommend food
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Title for Suggested Foods
+                Text(
+                    text = "Suggested Foods",
+                    style = MaterialTheme.typography.titleLarge
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+
+            // LazyVerticalGrid for Suggested Foods
+            items(suggestedFoods.chunked(2)) { rowItems ->
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    rowItems.forEach { food ->
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(4.dp)
+                        ) {
+                            SuggestedFoodCard(food = food, navController = navController)
+                        }
+                    }
+
+                    // Nếu số lượng item lẻ, thêm một Box trống để căn chỉnh
+                    if (rowItems.size < 2) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         }
     }
 }

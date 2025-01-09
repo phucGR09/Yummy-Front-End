@@ -110,7 +110,7 @@ fun CartScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Tổng: $${String.format(Locale.ROOT, "%.2f", totalPrice)}",
+                        text = "Total: $${String.format(Locale.ROOT, "%.2f", totalPrice)}",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -121,7 +121,7 @@ fun CartScreen(
                             .fillMaxWidth()
                             .height(50.dp)
                     ) {
-                        Text("Thanh toán", fontSize = 18.sp, color = Color.White)
+                        Text("Checkout", fontSize = 18.sp, color = Color.White)
                     }
                 }
             }

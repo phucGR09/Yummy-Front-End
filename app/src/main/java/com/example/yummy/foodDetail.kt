@@ -64,7 +64,7 @@ fun FoodDetail (
                 },
                 actions = {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.width(100.dp),
                         horizontalArrangement = Arrangement.End
                     ) {
                         IconButton(onClick = {
