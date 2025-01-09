@@ -31,12 +31,11 @@ fun PreviewStoreHomeScreen() {
     StoreHomeScreen(navController = navController)
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun StoreHomeScreen(navController: NavController, viewModel: StoreViewModel = StoreViewModel()) {
     val storeInfo = viewModel.storeInfo
-    val products by viewModel.products.collectAsState() // Lấy danh sách sản phẩm từ ViewModel
-    val isProductListEmpty by viewModel.isProductListEmpty.collectAsState() // Kiểm tra danh sách sản phẩm trống
+    val products by viewModel.products.collectAsState()
+    val isProductListEmpty by viewModel.isProductListEmpty.collectAsState()
 
     Column(
         modifier = Modifier
@@ -45,135 +44,130 @@ fun StoreHomeScreen(navController: NavController, viewModel: StoreViewModel = St
             .padding(16.dp)
     ) {
         // Top Bar
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = {}) {
-                    Icon(Icons.Default.Menu, "Menu")
-                }
-                Column {
-                    Text(
-                        text = storeInfo.name,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-                Image(
-                    painter = painterResource(id = R.drawable.icon_avatar),
-                    contentDescription = "Avatar",
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(MaterialTheme.shapes.medium)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = {}) {
+                Icon(
+                    Icons.Default.Menu,
+                    contentDescription = "Menu",
+                    tint = Color(0xFFFF5722) // Màu cam
                 )
             }
-
-
-        // Logo cửa hàng và thông tin
-
-            Spacer(modifier = Modifier.height(24.dp))
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Image(
-                    painter = painterResource(id = storeInfo.logoResId),
-                    contentDescription = "KeyBox Kafe Logo",
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clip(MaterialTheme.shapes.medium),
-                    contentScale = ContentScale.Fit
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+            Column {
                 Text(
                     text = storeInfo.name,
                     style = MaterialTheme.typography.titleMedium
                 )
-                Text(
-                    text = storeInfo.address,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
             }
-            Spacer(modifier = Modifier.height(24.dp))
+            Image(
+                painter = painterResource(id = R.drawable.icon_avatar),
+                contentDescription = "Avatar",
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(MaterialTheme.shapes.medium)
+            )
+        }
 
+        // Logo cửa hàng và thông tin
+        Spacer(modifier = Modifier.height(24.dp))
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Image(
+                painter = painterResource(id = storeInfo.logoResId),
+                contentDescription = "KeyBox Kafe Logo",
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(MaterialTheme.shapes.medium),
+                contentScale = ContentScale.Fit
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = storeInfo.name,
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = storeInfo.address,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
+        }
+        Spacer(modifier = Modifier.height(24.dp))
 
         // 5 nút chức năng
-
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                val functions = listOf(
-                    Pair("Phản hồi", R.drawable.feedback_icon),
-                    Pair("Thực đơn", R.drawable.menu_icon),
-                    Pair("Đơn hàng", R.drawable.order_icon),
-                    Pair("Lịch sử", R.drawable.history_icon),
-                    Pair("Doanh thu", R.drawable.revenue_icon)
-                )
-                functions.forEach { (name, icon) ->
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = icon),
-                            contentDescription = name,
-                            modifier = Modifier.size(48.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = name,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-
-
-        // Sản phẩm bán chạy
-
-            Text(
-                text = "Sản phẩm bán chạy",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 16.dp)
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            val functions = listOf(
+                Pair("Phản hồi", R.drawable.feedback_icon),
+                Pair("Thực đơn", R.drawable.menu_icon),
+                Pair("Đơn hàng", R.drawable.order_icon),
+                Pair("Lịch sử", R.drawable.history_icon),
+                Pair("Doanh thu", R.drawable.revenue_icon)
             )
-
-
-        // Hiển thị danh sách sản phẩm
-
-            if (isProductListEmpty) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
+            functions.forEach { (name, icon) ->
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Text(
-                        text = "Không có sản phẩm nào.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.error
+                    Icon(
+                        painter = painterResource(id = icon),
+                        contentDescription = name,
+                        modifier = Modifier.size(48.dp),
+                        tint = Color(0xFFFF5722) // Màu cam
                     )
-                }
-            } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(products) { product ->
-                        ProductCard(product = product)
-                    }
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                 }
             }
         }
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Sản phẩm bán chạy
+        Text(
+            text = "Sản phẩm bán chạy",
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        // Hiển thị danh sách sản phẩm
+        if (isProductListEmpty) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Không có sản phẩm nào.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(products) { product ->
+                    ProductCard(product = product)
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -187,6 +181,7 @@ fun ProductCard(product: Product) {
                 // Xử lý khi người dùng nhấn vào sản phẩm
                 println("Sản phẩm: ${product.name}")
             },
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFE5D1)), // Màu cam nhạt
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column {
@@ -210,7 +205,7 @@ fun ProductCard(product: Product) {
                 Text(
                     text = "${product.price} VNĐ",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary
+                    color = Color(0xFFFF5722) // Màu cam
                 )
             }
         }
