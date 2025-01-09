@@ -67,4 +67,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation( "androidx.navigation:navigation-compose:2.8.5")// Đảm bảo sử dụng phiên bản mới nhất
+
+    implementation("io.coil-kt:coil-compose:2.4.0") // Phiên bản mới nhất của Coil Compose
+
 }
