@@ -11,6 +11,8 @@ const val REQUEST_CODE_PICK_IMAGE = 1001
 
 
 data class Dish(
+    val item_id: Int,
+    val restaurant_id: Int,
     val name: String,
     val price: Int,
     val description: String?, // Mô tả món ăn (tùy chọn)
@@ -20,9 +22,9 @@ data class Dish(
 class MenuSellerViewModel : ViewModel() {
     private val _dishes = MutableStateFlow(
         listOf(
-            Dish(name = "Latte", price = 50000, description = "Latte Việt Nam", imagePath = null),
-            Dish(name = "Bánh tráng trộn", price = 25000, description = null, imagePath = null),
-            Dish(name = "Matcha latte", price = 55000, description = "Matcha latte rất ngon", imagePath = null)
+            Dish(0,0,name = "Latte", price = 50000, description = "Latte Việt Nam", imagePath = null),
+            Dish(1,0,name = "Bánh tráng trộn", price = 25000, description = null, imagePath = null),
+            Dish(2,0,name = "Matcha latte", price = 55000, description = "Matcha latte rất ngon", imagePath = null)
         )
     )
     val dishes: StateFlow<List<Dish>> = _dishes
