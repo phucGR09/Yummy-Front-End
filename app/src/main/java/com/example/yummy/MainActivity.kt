@@ -1,36 +1,17 @@
 package com.example.yummy
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.yummy.ui.theme.YummyTheme
@@ -39,111 +20,218 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            // Áp dụng YummyTheme
-            YummyTheme(darkTheme = false){
-                val userAddress = "41, Nguyễn Văn Cừ, P4, Q5, TPHCM"
+            YummyTheme(darkTheme = false) {
                 val navController = rememberNavController()
                 var cartItems by remember { mutableStateOf(emptyList<CartItem>()) }
                 val sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE)
-                //val currentBackStackEntry by navController.currentBackStackEntryAsState()
-                //val currentDestination = currentBackStackEntry?.destination?.route
-//                Scaffold(
-//                    modifier = Modifier.fillMaxSize(),
-//                    bottomBar = {
-//                        if (currentDestination in listOf("HomeScreen", "Favorite", "About")) {
-//                            BottomBar(navController)
-//                        }
-//                    },
-//                ) { paddingValues ->
-                    NavHost(
-                        navController,
-                        startDestination = "HomeScreen",
-//                        modifier = Modifier.padding(paddingValues)
-                    ) {
-                        composable("HomeScreen") {
-                            HomeScreen(navController)
-                        }
-                        composable(
-                            "foodDetail/{foodName}/{foodPrice}/{foodDescription}/{foodImage}",
-                            arguments = listOf(
-                                navArgument("foodName") { type = NavType.StringType },
-                                navArgument("foodPrice") { type = NavType.FloatType },
-                                navArgument("foodDescription") { type = NavType.StringType },
-                                navArgument("foodImage") { type = NavType.IntType }
-                            )
-                        ) { backStackEntry ->
-                            val foodName = backStackEntry.arguments?.getString("foodName").orEmpty()
-                            val foodPrice =
-                                backStackEntry.arguments?.getFloat("foodPrice")?.toDouble() ?: 0.0
-                            val foodDescription =
-                                backStackEntry.arguments?.getString("foodDescription").orEmpty()
-                            val foodImage = backStackEntry.arguments?.getInt("foodImage")
-                                ?: R.drawable.food_image
+                val userAddress = "41, Nguyễn Văn Cừ, P4, Q5, TPHCM"
 
-                            FoodDetail(
-                                onBackClicked = { navController.popBackStack() },
-                                foodImage = foodImage,
-                                foodName = foodName,
-                                foodPrice = foodPrice,
-                                foodDescription = foodDescription,
-                                cartItems = cartItems,
-                                updateCartItems = { updatedItems -> cartItems = updatedItems },
-                                navController
-                            )
-                        }
-                        composable("CartScreen") {
-                            CartScreen(
-                                cartItems = cartItems, // Truyền giỏ hàng hiện tại
-                                onUpdateCartItems = { updatedItems ->
-                                    cartItems = updatedItems
-                                }, // Cập nhật giỏ hàng
-                                onBackClicked = { navController.popBackStack() },
-                                onCheckoutClicked = {
-                                    navController.navigate("CheckoutScreen")
-                                }
-                            )
-                        }
-                        composable("CheckoutScreen") {
-                            CheckoutScreen(
-                                cartItems = cartItems,
-                                userAddress = userAddress,
-                                onConfirmCheckout = {
-                                    navController.navigate("OrderCompleted")
-                                },
-                                onBackClicked = { navController.popBackStack() }
-                            )
-                        }
-                        composable("OrderCompleted") {
-                            OrderCompleted(navController)
-                        }
-                        composable("Settings") {
-                            Settings(navController)
-                        }
-                        composable("Favorite") {
-                            Favorite(navController)
-                        }
-                        // User Profile Screen
-                        composable("UserProfile") {
-                            UserProfile(navController, sharedPreferences)
-                        }
-
-                        composable("EditUserProfile") {
-                            EditUserProfile(navController, sharedPreferences)
-                        }
-                        composable("ResetPassword") {
-                            ResetPassword(navController, sharedPreferences)
-                        }
-                        composable("MyOrders") {
-                            MyOrders(
-                                onBackClicked = {
-                                    navController.popBackStack()
-                                }
-                            )
-                        }
+                NavHost(
+                    navController,
+                    startDestination = "welcome_screen",
+                ) {
+                    composable("welcome_screen") {
+                        WelcomeScreen(
+                            onSignUpClick = { navController.navigate("sign_up_screen") },
+                            onSignInClick = { navController.navigate("sign_in_screen") }
+                        )
                     }
-               // }
+                    composable("sign_up_screen") {
+                        SignUpScreen(
+                            onSignUpSuccess = { name, contactInfo, password, role ->
+                                val generatedOtp = generateOtp()
+                                navController.navigate("verification_code_screen/$name/$contactInfo/$password/$role/$generatedOtp")
+                            },
+                            onSignInClick = { navController.navigate("sign_in_screen") }
+                        )
+                    }
+                    composable(
+                        "verification_code_screen/{name}/{contactInfo}/{password}/{role}/{generatedOtp}",
+                        arguments = listOf(
+                            navArgument("name") { type = NavType.StringType },
+                            navArgument("contactInfo") { type = NavType.StringType },
+                            navArgument("password") { type = NavType.StringType },
+                            navArgument("role") { type = NavType.StringType },
+                            navArgument("generatedOtp") { type = NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        val name = backStackEntry.arguments?.getString("name") ?: ""
+                        val contactInfo = backStackEntry.arguments?.getString("contactInfo") ?: ""
+                        val password = backStackEntry.arguments?.getString("password") ?: ""
+                        val role = backStackEntry.arguments?.getString("role") ?: ""
+                        val generatedOtp = backStackEntry.arguments?.getString("generatedOtp") ?: ""
+
+                        VerificationCodeScreen(
+                            name = name,
+                            contactInfo = contactInfo,
+                            password = password,
+                            role = role,
+                            generatedOtp = generatedOtp,
+                            onVerifySuccess = {
+                                saveUserDetails(
+                                    context = this@MainActivity,
+                                    name = name,
+                                    emailOrPhone = contactInfo,
+                                    password = password,
+                                    role = role
+                                )
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "User details saved successfully!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                if (role.trim().equals("buyer", ignoreCase = true)) {
+                                    navController.navigate("profile_buyer_screen/$name/$contactInfo")
+                                } else if (role.trim().equals("seller", ignoreCase = true)) {
+                                    navController.navigate("profile_seller_screen/$name/$contactInfo")
+                                } else {
+                                    navController.navigate("profile_shipper_screen/$name/$contactInfo")
+                                }
+                            },
+                            onResendOtp = {
+                                val newOtp = generateOtp()
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "OTP resent to ${if (contactInfo.contains("@")) "email" else "phone"}: $contactInfo. OTP: $newOtp",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                newOtp
+                            }
+                        )
+                    }
+                    composable(
+                        "profile_shipper_screen/{name}/{contactInfo}",
+                        arguments = listOf(
+                            navArgument("name") { type = NavType.StringType },
+                            navArgument("contactInfo") { type = NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        val name = backStackEntry.arguments?.getString("name") ?: ""
+                        val contactInfo = backStackEntry.arguments?.getString("contactInfo") ?: ""
+                        ProfileShipperScreen(
+                            name = name,
+                            contactInfo = contactInfo,
+                            onSave = { updatedName, updatedAddress ->
+                                saveUserDetails(
+                                    context = this@MainActivity,
+                                    name = updatedName,
+                                    emailOrPhone = contactInfo,
+                                    password = "",
+                                    role = "shipper"
+                                )
+                                navController.navigate("home_screen")
+                            }
+                        )
+                    }
+                    composable(
+                        "profile_buyer_screen/{name}/{contactInfo}",
+                        arguments = listOf(
+                            navArgument("name") { type = NavType.StringType },
+                            navArgument("contactInfo") { type = NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        val name = backStackEntry.arguments?.getString("name") ?: ""
+                        val contactInfo = backStackEntry.arguments?.getString("contactInfo") ?: ""
+                        ProfileBuyerScreen(
+                            name = name,
+                            contactInfo = contactInfo,
+                            onSave = { updatedName, updatedAddress ->
+                                saveUserDetails(
+                                    context = this@MainActivity,
+                                    name = updatedName,
+                                    emailOrPhone = contactInfo,
+                                    password = "",
+                                    role = "buyer"
+                                )
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Profile updated successfully!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                navController.navigate("home_screen")
+                            }
+                        )
+                    }
+                    composable(
+                        "profile_seller_screen/{name}/{contactInfo}",
+                        arguments = listOf(
+                            navArgument("name") { type = NavType.StringType },
+                            navArgument("contactInfo") { type = NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        val name = backStackEntry.arguments?.getString("name") ?: ""
+                        val contactInfo = backStackEntry.arguments?.getString("contactInfo") ?: ""
+                        ProfileSellerScreen(
+                            name = name,
+                            contactInfo = contactInfo,
+                            onSave = { updatedName, updatedStoreName ->
+                                saveUserDetails(
+                                    context = this@MainActivity,
+                                    name = updatedName,
+                                    emailOrPhone = contactInfo,
+                                    password = "",
+                                    role = "seller"
+                                )
+                                navController.navigate("home_screen")
+                            }
+                        )
+                    }
+                    composable("home_screen") {
+                        HomeScreen(navController = navController)
+                    }
+                    composable("CartScreen") {
+                        CartScreen(
+                            cartItems = cartItems,
+                            onUpdateCartItems = { updatedItems -> cartItems = updatedItems },
+                            onBackClicked = { navController.popBackStack() },
+                            onCheckoutClicked = {
+                                navController.navigate("CheckoutScreen")
+                            }
+                        )
+                    }
+                    composable("CheckoutScreen") {
+                        CheckoutScreen(
+                            cartItems = cartItems,
+                            userAddress = userAddress,
+                            onConfirmCheckout = {
+                                navController.navigate("OrderCompleted")
+                            },
+                            onBackClicked = { navController.popBackStack() }
+                        )
+                    }
+                    composable("OrderCompleted") {
+                        OrderCompleted(navController)
+                    }
+                    composable("Settings") {
+                        Settings(navController)
+                    }
+                    composable("Favorite") {
+                        Favorite(navController)
+                    }
+                }
             }
         }
+    }
+
+    private fun generateOtp(): String {
+        return (1000..9999).random().toString()
+    }
+
+    private fun saveUserDetails(
+        context: Context,
+        name: String,
+        emailOrPhone: String,
+        password: String,
+        role: String
+    ) {
+        val sharedPreferences: SharedPreferences =
+            context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("name", name)
+        editor.putString("emailOrPhone", emailOrPhone)
+        editor.putString("password", password)
+        editor.putString("role", role)
+        editor.apply()
     }
 }
 
@@ -151,9 +239,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun HomeScreenPreview() {
     val navController = rememberNavController()
-    // Áp dụng YummyTheme trong preview
     YummyTheme {
         HomeScreen(navController = navController)
     }
 }
-
