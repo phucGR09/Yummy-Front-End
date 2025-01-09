@@ -45,6 +45,14 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 var cartItems by remember { mutableStateOf(emptyList<CartItem>()) }
                 val sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+                val isUserLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
+                if (isUserLoggedIn) {
+                    // Người dùng đã đăng nhập, chuyển đến màn hình chính
+                    navController.navigate("HomeScreen")
+                } else {
+                    // Người dùng chưa đăng nhập, chuyển đến màn hình đăng nhập
+                    navController.navigate("LoginScreen")
+                }
                 //val currentBackStackEntry by navController.currentBackStackEntryAsState()
                 //val currentDestination = currentBackStackEntry?.destination?.route
 //                Scaffold(
@@ -157,3 +165,11 @@ fun HomeScreenPreview() {
     }
 }
 
+data class User(
+    val id: Int?,
+    val userName: String,
+    val email: String,
+    val fullName: String?,
+    val phoneNumber: String?,
+    val userType: String
+)
