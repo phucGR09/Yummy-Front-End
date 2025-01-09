@@ -14,13 +14,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewProfileBuyerScreen() {
-    val navController = rememberNavController()
-    StoreHomeScreen(navController = navController)
-}
-
 @Composable
 fun ProfileBuyerScreen(
     name: String,
