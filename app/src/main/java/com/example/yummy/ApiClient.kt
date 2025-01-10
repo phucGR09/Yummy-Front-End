@@ -7,14 +7,31 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
 
+import com.google.gson.*
+import java.lang.reflect.Type
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+
+class LocalTimeAdapter : JsonDeserializer<LocalTime>, JsonSerializer<LocalTime> {
+    private val formatter = DateTimeFormatter.ofPattern("HH:mm:ss")
+
+    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): LocalTime {
+        return LocalTime.parse(json.asString, formatter)
+    }
+
+    override fun serialize(src: LocalTime, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
+        return JsonPrimitive(src.format(formatter))
+    }
+}
+
 object ApiClient {
-    private const val BASE_URL = "http://192.168.1.171:8080/api/v1/"  // Thay bằng địa chỉ IP backend
+    private const val BASE_URL = "http://192.168.1.3:8080/api/v1/"  // Thay bằng địa chỉ IP backend
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
-    private var authToken = "eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJZdW1teS1iYWNrZW5kLXRlYW0iLCJzdWIiOiJmb28iLCJleHAiOjE3MzY1NzI4MjcsImlhdCI6MTczNjQ4NjQyNywic2NvcGUiOiJBRE1JTiJ9.Sc-OtN4nM0Q8RYYNTCdNNtYDoMmi2BxG04oedBdt-JqNc0m_G21xKJ1OnPMWM2BRNLbqrciLgPLyd45t3iaV6w"
+    private var authToken = "eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJZdW1teS1iYWNrZW5kLXRlYW0iLCJzdWIiOiJhZG1pbiIsImV4cCI6MTczNjYxMDgwNiwiaWF0IjoxNzM2NTI0NDA2LCJzY29wZSI6IkFETUlOIn0.7v5IMTvMWx1_MRtf9YJsaA-yP89JWpTLVPWrN5VYqj9xKyN_33AykUQSuKucpJAKHMJEiCco9ImZBDpd59Mw2w"
 
     fun setAuthToken(token: String) {
         authToken = token
@@ -37,10 +54,15 @@ object ApiClient {
         .readTimeout(30, TimeUnit.SECONDS)
         .build()
 
+    val gson: Gson = GsonBuilder()
+        .registerTypeAdapter(LocalTime::class.java, LocalTimeAdapter())
+        .create()
+
     val instance: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .client(client)
             .build()
     }
