@@ -81,10 +81,8 @@ data class UserDetails(
     val userType: String
 )
 
-interface ApiService {
-    @POST("admin/menu-items/create")
-    suspend fun addDish(@Body dish: Dish): Dish
 
+interface ApiService {
     @PATCH("admin/menu-items/update")
     suspend fun updateMenuItem(@Body request: UpdateMenuItemRequest): UpdateMenuItemResponse
 

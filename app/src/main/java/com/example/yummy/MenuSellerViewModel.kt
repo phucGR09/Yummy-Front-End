@@ -84,6 +84,8 @@ class MenuSellerViewModel(private val menuModel: MenuModel) : ViewModel() {
         return "https://example.com/images/${imagePath.hashCode()}.jpg" // URL giả lập
     }
 
+
+
 //    fun rejectOrderWithReason(orderId: Int, reason: String, onResult: (Boolean) -> Unit) {
 //        viewModelScope.launch {
 //            try {

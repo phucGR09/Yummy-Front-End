@@ -114,6 +114,28 @@ class MenuModel {
         }
     }
 
+    suspend fun removeDishByName(dishName: String): Boolean {
+        return try {
+            // Tìm món ăn cần xóa
+            val dishToRemove = _dishes.value.find { it.name == dishName }
+                ?: throw Exception("Món ăn không tồn tại")
+
+            val response = apiService.deleteDish(dishToRemove.itemId)
+
+            if (response.code() == 200) {
+                _dishes.value = _dishes.value.filter { it.itemId != dishToRemove.itemId }
+                println("Xóa món ăn thành công")
+                true
+            } else {
+                println("Xóa món ăn thất bại: ${response.message()}")
+                false
+            }
+        }catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
     // Lấy danh sách món ăn
     suspend fun getDishes(): Boolean {
         return try {
@@ -140,5 +162,9 @@ class MenuModel {
             e.printStackTrace()
             false
         }
+    }
+
+    suspend fun updateImage(dish: Dish, uploadedUrl: String){
+
     }
 }
