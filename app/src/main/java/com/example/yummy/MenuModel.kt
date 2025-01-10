@@ -15,6 +15,12 @@ data class Dish(
 )
 
 class MenuModel {
+<<<<<<< HEAD
+=======
+
+    private val apiService = ApiClient.instance.create(ApiService::class.java)
+
+>>>>>>> 19e75a6e9342efa0cfc9d7df3236373466809621
     // Danh sách món ăn được quản lý bằng StateFlow
     private val _dishes = MutableStateFlow<List<Dish>>(
         listOf(
