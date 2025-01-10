@@ -40,12 +40,13 @@ import androidx.compose.ui.text.style.TextAlign
 @Composable
 fun PreviewDEditDishScreen() {
     val navController = rememberNavController()
-    val viewModel = MenuSellerViewModel()
+    val orderModel= MenuModel()
+    val viewModel = MenuSellerViewModel(orderModel)
 
     // Món ăn giả lập để chỉnh sửa
     val dish = Dish(
-        item_id =1,
-        restaurant_id =0,
+        itemId =1,
+        restaurantId =0,
         name = "Bánh tráng trộn",
         price = 25000,
         description = "Món ăn vặt nổi tiếng",
@@ -95,7 +96,13 @@ fun DeleteDishScreen(
             // Nút "XÓA MÓN ĂN"
             Button(
                 onClick = {
-                    viewModel.removeDish(dish.name) // Xóa món ăn
+                    viewModel.removeDishByName(dish.name){ success ->
+                        if (success) {
+                            println("Xóa món ăn thành công")
+                        } else {
+                            println("Xóa món ăn thất bại")
+                        }
+                    } // Xóa món ăn
                     navController.popBackStack() // Quay lại màn hình trước
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
