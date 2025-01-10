@@ -108,144 +108,237 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("sign_up_screen") {
                         SignUpScreen(
-                            onSignUpSuccess = { name, contactInfo, password, role ->
+                            onSignUpSuccess = { fullName, username, email, phone, password, role ->
                                 val generatedOtp = generateOtp()
-                                navController.navigate("verification_code_screen/$name/$contactInfo/$password/$role/$generatedOtp")
+                                navController.navigate("verification_code_screen/$fullName/$username/$email/$phone/$password/$role/$generatedOtp")
                             },
                             onSignInClick = { navController.navigate("sign_in_screen") }
                         )
                     }
+
+                    composable("sign_in_screen") {
+                        SignInScreen(
+                            sharedPreferences = sharedPreferences, // Pass SharedPreferences here
+                            onSignInSuccess = {
+                                Toast.makeText(this@MainActivity, "Sign-in successful!", Toast.LENGTH_SHORT).show()
+                                navController.navigate("home_screen")
+                            },
+                            onSignUpClick = { navController.navigate("sign_up_screen") }
+                        )
+                    }
                     composable(
-                        "verification_code_screen/{name}/{contactInfo}/{password}/{role}/{generatedOtp}",
+                        "verification_code_screen/{fullName}/{username}/{email}/{phone}/{password}/{role}/{generatedOtp}",
                         arguments = listOf(
-                            navArgument("name") { type = NavType.StringType },
-                            navArgument("contactInfo") { type = NavType.StringType },
+                            navArgument("fullName") { type = NavType.StringType },
+                            navArgument("username") { type = NavType.StringType },
+                            navArgument("email") { type = NavType.StringType },
+                            navArgument("phone") { type = NavType.StringType },
                             navArgument("password") { type = NavType.StringType },
                             navArgument("role") { type = NavType.StringType },
                             navArgument("generatedOtp") { type = NavType.StringType }
                         )
                     ) { backStackEntry ->
-                        val name = backStackEntry.arguments?.getString("name") ?: ""
-                        val contactInfo = backStackEntry.arguments?.getString("contactInfo") ?: ""
+                        val fullName = backStackEntry.arguments?.getString("fullName") ?: ""
+                        val username = backStackEntry.arguments?.getString("username") ?: ""
+                        val email = backStackEntry.arguments?.getString("email") ?: ""
+                        val phone = backStackEntry.arguments?.getString("phone") ?: ""
                         val password = backStackEntry.arguments?.getString("password") ?: ""
                         val role = backStackEntry.arguments?.getString("role") ?: ""
                         val generatedOtp = backStackEntry.arguments?.getString("generatedOtp") ?: ""
 
-                        VerificationCodeScreen(
-                            name = name,
-                            contactInfo = contactInfo,
+                        // Combine extracted parameters into a SignUpData object
+                        val signUpData = SignUpData(
+                            fullName = fullName,
+                            username = username,
+                            email = email,
+                            phone = phone,
                             password = password,
-                            role = role,
+                            role = UserType.valueOf(role.uppercase())
+                        )
+
+                        VerificationCodeScreen(
+                            signUpData = signUpData,
                             generatedOtp = generatedOtp,
-                            onVerifySuccess = {
+                            onVerifySuccess = { verifiedData ->
                                 saveUserDetails(
                                     context = this@MainActivity,
-                                    name = name,
-                                    emailOrPhone = contactInfo,
-                                    password = password,
-                                    role = role
+                                    name = verifiedData.fullName,
+                                    emailOrPhone = verifiedData.email,
+                                    password = verifiedData.password,
+                                    role = verifiedData.role
                                 )
                                 Toast.makeText(
                                     this@MainActivity,
-                                    "User details saved successfully!",
+                                    "Xác minh thành công! Thông tin người dùng đã được lưu.",
                                     Toast.LENGTH_SHORT
                                 ).show()
-                                if (role.trim().equals("buyer", ignoreCase = true)) {
-                                    navController.navigate("profile_buyer_screen/$name/$contactInfo")
-                                } else if (role.trim().equals("seller", ignoreCase = true)) {
-                                    navController.navigate("profile_seller_screen/$name/$contactInfo")
-                                } else {
-                                    navController.navigate("profile_shipper_screen/$name/$contactInfo")
+
+                                // Navigate to the respective profile screen
+                                when (verifiedData.role) {
+                                    UserType.CUSTOMER -> navController.navigate("profile_buyer_screen/${verifiedData.username}/${verifiedData.fullName}/${verifiedData.email}/${verifiedData.phone}/AddressPlaceholder")
+                                    UserType.RESTAURANT_OWNER -> navController.navigate("profile_seller_screen/${verifiedData.username}/${verifiedData.fullName}/AddressPlaceholder/8:00-18:00/123456/${verifiedData.email}/${verifiedData.phone}")
+                                    UserType.DELIVERY_DRIVER -> navController.navigate("profile_shipper_screen/${verifiedData.fullName}/${verifiedData.username}/${verifiedData.email}/${verifiedData.phone}/CCCDPlaceholder/LicensePlaceholder/AvatarPlaceholder")
                                 }
                             },
                             onResendOtp = {
                                 val newOtp = generateOtp()
                                 Toast.makeText(
                                     this@MainActivity,
-                                    "OTP resent to ${if (contactInfo.contains("@")) "email" else "phone"}: $contactInfo. OTP: $newOtp",
+                                    "Mã OTP mới đã được gửi tới số điện thoại $phone. Mã OTP: $newOtp",
                                     Toast.LENGTH_SHORT
                                 ).show()
                                 newOtp
                             }
                         )
                     }
+
+
+
+
+
+
+
+
                     composable(
-                        "profile_shipper_screen/{name}/{contactInfo}",
+                        "profile_shipper_screen/{fullName}/{username}/{email}/{phoneNumber}/{cccd}/{license}/{avatarUrl}",
                         arguments = listOf(
-                            navArgument("name") { type = NavType.StringType },
-                            navArgument("contactInfo") { type = NavType.StringType }
+                            navArgument("fullName") { type = NavType.StringType },
+                            navArgument("username") { type = NavType.StringType },
+                            navArgument("email") { type = NavType.StringType },
+                            navArgument("phoneNumber") { type = NavType.StringType },
+                            navArgument("cccd") { type = NavType.StringType },
+                            navArgument("license") { type = NavType.StringType },
+                            navArgument("avatarUrl") { type = NavType.StringType }
                         )
                     ) { backStackEntry ->
-                        val name = backStackEntry.arguments?.getString("name") ?: ""
-                        val contactInfo = backStackEntry.arguments?.getString("contactInfo") ?: ""
+                        val fullName = backStackEntry.arguments?.getString("fullName") ?: ""
+                        val username = backStackEntry.arguments?.getString("username") ?: ""
+                        val email = backStackEntry.arguments?.getString("email") ?: ""
+                        val phoneNumber = backStackEntry.arguments?.getString("phoneNumber") ?: ""
+                        val cccd = backStackEntry.arguments?.getString("cccd") ?: ""
+                        val license = backStackEntry.arguments?.getString("license") ?: ""
+                        val avatarUrl = backStackEntry.arguments?.getString("avatarUrl") ?: ""
+
                         ProfileShipperScreen(
-                            name = name,
-                            contactInfo = contactInfo,
-                            onSave = { updatedName, updatedAddress ->
+                            fullName = fullName,
+                            username = username,
+                            email = email,
+                            phoneNumber = phoneNumber,
+                            cccd = cccd,
+                            license = license,
+                            avatarUrl = avatarUrl,
+                            onSave = { updatedFullName, updatedUsername, updatedEmail, updatedPhoneNumber, updatedCCCD, updatedLicense, updatedAvatarUrl ->
+                                // Save the updated details
                                 saveUserDetails(
                                     context = this@MainActivity,
-                                    name = updatedName,
-                                    emailOrPhone = contactInfo,
-                                    password = "",
-                                    role = "shipper"
+                                    name = updatedFullName,
+                                    emailOrPhone = updatedEmail,
+                                    password = "", // Password handling not required here
+                                    role = UserType.DELIVERY_DRIVER
                                 )
+
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Thông tin đã được cập nhật thành công!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                                // Navigate back to home screen or perform other actions
                                 navController.navigate("home_screen")
                             }
                         )
                     }
+
                     composable(
-                        "profile_buyer_screen/{name}/{contactInfo}",
+                        "profile_buyer_screen/{username}/{fullName}/{email}/{phoneNumber}/{address}",
                         arguments = listOf(
-                            navArgument("name") { type = NavType.StringType },
-                            navArgument("contactInfo") { type = NavType.StringType }
+                            navArgument("username") { type = NavType.StringType },
+                            navArgument("fullName") { type = NavType.StringType },
+                            navArgument("email") { type = NavType.StringType },
+                            navArgument("phoneNumber") { type = NavType.StringType },
+                            navArgument("address") { type = NavType.StringType }
                         )
                     ) { backStackEntry ->
-                        val name = backStackEntry.arguments?.getString("name") ?: ""
-                        val contactInfo = backStackEntry.arguments?.getString("contactInfo") ?: ""
+                        val username = backStackEntry.arguments?.getString("username") ?: ""
+                        val fullName = backStackEntry.arguments?.getString("fullName") ?: ""
+                        val email = backStackEntry.arguments?.getString("email") ?: ""
+                        val phoneNumber = backStackEntry.arguments?.getString("phoneNumber") ?: ""
+                        val address = backStackEntry.arguments?.getString("address") ?: ""
+
                         ProfileBuyerScreen(
-                            name = name,
-                            contactInfo = contactInfo,
-                            onSave = { updatedName, updatedAddress ->
+                            fullName = fullName,
+                            username = username,
+                            email = email,
+                            phoneNumber = phoneNumber,
+                            address = address,
+                            onSave = { updatedFullName, updatedEmail, updatedPhoneNumber, updatedAddress ->
                                 saveUserDetails(
                                     context = this@MainActivity,
-                                    name = updatedName,
-                                    emailOrPhone = contactInfo,
-                                    password = "",
-                                    role = "buyer"
+                                    name = updatedFullName,
+                                    emailOrPhone = updatedEmail,
+                                    password = "", // Password not updated in this context
+                                    role = UserType.CUSTOMER
                                 )
                                 Toast.makeText(
                                     this@MainActivity,
-                                    "Profile updated successfully!",
+                                    "Thông tin người mua hàng đã được cập nhật thành công!",
                                     Toast.LENGTH_SHORT
                                 ).show()
-                                navController.navigate("home_screen")
+                                navController.navigate("home_screen") // Navigate back to the home screen
                             }
                         )
                     }
+
                     composable(
-                        "profile_seller_screen/{name}/{contactInfo}",
+                        "profile_seller_screen/{username}/{fullName}/{address}/{openingHours}/{taxCode}/{email}/{phoneNumber}",
                         arguments = listOf(
-                            navArgument("name") { type = NavType.StringType },
-                            navArgument("contactInfo") { type = NavType.StringType }
+                            navArgument("username") { type = NavType.StringType },
+                            navArgument("fullName") { type = NavType.StringType },
+                            navArgument("address") { type = NavType.StringType },
+                            navArgument("openingHours") { type = NavType.StringType },
+                            navArgument("taxCode") { type = NavType.StringType },
+                            navArgument("email") { type = NavType.StringType },
+                            navArgument("phoneNumber") { type = NavType.StringType }
                         )
                     ) { backStackEntry ->
-                        val name = backStackEntry.arguments?.getString("name") ?: ""
-                        val contactInfo = backStackEntry.arguments?.getString("contactInfo") ?: ""
+                        val username = backStackEntry.arguments?.getString("username") ?: ""
+                        val fullName = backStackEntry.arguments?.getString("fullName") ?: ""
+                        val address = backStackEntry.arguments?.getString("address") ?: ""
+                        val openingHours = backStackEntry.arguments?.getString("openingHours") ?: ""
+                        val taxCode = backStackEntry.arguments?.getString("taxCode") ?: ""
+                        val email = backStackEntry.arguments?.getString("email") ?: ""
+                        val phoneNumber = backStackEntry.arguments?.getString("phoneNumber") ?: ""
+
                         ProfileSellerScreen(
-                            name = name,
-                            contactInfo = contactInfo,
-                            onSave = { updatedName, updatedStoreName ->
+                            username = username,
+                            fullName = fullName,
+                            address = address,
+                            openingHours = openingHours,
+                            taxCode = taxCode,
+                            email = email,
+                            phoneNumber = phoneNumber,
+                            onSave = { updatedFullName, updatedAddress, updatedOpeningHours, updatedTaxCode, updatedEmail, updatedPhoneNumber ->
+                                // Save the updated details
                                 saveUserDetails(
                                     context = this@MainActivity,
-                                    name = updatedName,
-                                    emailOrPhone = contactInfo,
-                                    password = "",
-                                    role = "seller"
+                                    name = updatedFullName,
+                                    emailOrPhone = updatedEmail,
+                                    password = "", // Password handling is not required in this context
+                                    role = UserType.RESTAURANT_OWNER
                                 )
+
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Thông tin người bán hàng đã được cập nhật thành công!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                                // Navigate back to the home screen or other relevant screen
                                 navController.navigate("home_screen")
                             }
                         )
                     }
+
                     composable("home_screen") {
                         HomeScreen(navController = navController)
                     }
@@ -292,7 +385,7 @@ class MainActivity : ComponentActivity() {
         name: String,
         emailOrPhone: String,
         password: String,
-        role: String
+        role: UserType
     ) {
         val sharedPreferences: SharedPreferences =
             context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
@@ -300,9 +393,10 @@ class MainActivity : ComponentActivity() {
         editor.putString("name", name)
         editor.putString("emailOrPhone", emailOrPhone)
         editor.putString("password", password)
-        editor.putString("role", role)
+        editor.putString("role", role.name) // Save the role as its name
         editor.apply()
     }
+
 }
 
 @Preview(showBackground = true)
@@ -316,38 +410,38 @@ fun HomeScreenPreview() {
 
 
 
-@Composable
-fun AppNavGraph(navController: NavHostController, viewModel: MenuSellerViewModel) {
-    NavHost(navController = navController, startDestination = "menu_seller_screen") {
-        composable("menu_seller_screen") {
-            MenuSeller(
-                navController = navController,
-                viewModel = viewModel
-            )
-        }
-
-        composable("addDish") {
-            AddDishScreen(navController = navController,viewModel)
-        }
-
-        composable("editDish/{dishName}") { backStackEntry ->
-            val dishName = backStackEntry.arguments?.getString("dishName") ?: ""
-            val dish = viewModel.dishes.collectAsState().value.find { it.name == dishName }
-            if (dish != null) {
-                EditDishScreen(navController = navController, dish = dish, viewModel)
-            }
-        }
-
-        composable("deleteDish/{dishName}") { backStackEntry ->
-            val dishName = backStackEntry.arguments?.getString("dishName") ?: ""
-            val dish = viewModel.dishes.collectAsState().value.find { it.name == dishName }
-            if (dish != null) {
-                DeleteDishScreen(
-                    navController = navController,
-                    dish = dish,
-                    viewModel = viewModel
-                )
-            }
-        }
-    }
-}
+//@Composable
+//fun AppNavGraph(navController: NavHostController, viewModel: MenuSellerViewModel) {
+//    NavHost(navController = navController, startDestination = "menu_seller_screen") {
+//        composable("menu_seller_screen") {
+//            MenuSeller(
+//                navController = navController,
+//                viewModel = viewModel
+//            )
+//        }
+//
+//        composable("addDish") {
+//            AddDishScreen(navController = navController,viewModel)
+//        }
+//
+//        composable("editDish/{dishName}") { backStackEntry ->
+//            val dishName = backStackEntry.arguments?.getString("dishName") ?: ""
+//            val dish = viewModel.dishes.collectAsState().value.find { it.name == dishName }
+//            if (dish != null) {
+//                EditDishScreen(navController = navController, dish = dish, viewModel)
+//            }
+//        }
+//
+//        composable("deleteDish/{dishName}") { backStackEntry ->
+//            val dishName = backStackEntry.arguments?.getString("dishName") ?: ""
+//            val dish = viewModel.dishes.collectAsState().value.find { it.name == dishName }
+//            if (dish != null) {
+//                DeleteDishScreen(
+//                    navController = navController,
+//                    dish = dish,
+//                    viewModel = viewModel
+//                )
+//            }
+//        }
+//    }
+//}

@@ -12,19 +12,35 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+enum class UserType {
+    CUSTOMER, RESTAURANT_OWNER, DELIVERY_DRIVER
+}
+
+// Extension function to map UserType to Vietnamese display names
+fun UserType.toDisplayName(): String {
+    return when (this) {
+        UserType.CUSTOMER -> "Người Mua hàng"
+        UserType.RESTAURANT_OWNER -> "Người Bán Hàng"
+        UserType.DELIVERY_DRIVER -> "Người Giao Hàng"
+    }
+}
+
 @Composable
 fun SignUpScreen(
-    onSignUpSuccess: (String, String, String, String) -> Unit,
+    onSignUpSuccess: (String, String, String, String, String, UserType) -> Unit,
     onSignInClick: () -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
-    var emailOrPhone by remember { mutableStateOf("") }
+    var fullName by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
-    var selectedRole by remember { mutableStateOf("") }
+    var selectedRole by remember { mutableStateOf<UserType?>(null) }
 
     val context = LocalContext.current
 
@@ -35,24 +51,43 @@ fun SignUpScreen(
             .background(Color.White),
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Sign Up", fontSize = 24.sp)
+        Text("Đăng Ký", fontSize = 24.sp)
 
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text("Name") },
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Tên Đăng Nhập") },
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
-            value = emailOrPhone,
-            onValueChange = { emailOrPhone = it },
-            label = { Text("Email/Phone") },
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = fullName,
+            onValueChange = { fullName = it },
+            label = { Text("Họ và Tên") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = phone,
+            onValueChange = { phone = it },
+            label = { Text("Số Điện Thoại") },
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Phone),
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -61,7 +96,7 @@ fun SignUpScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
+            label = { Text("Mật Khẩu") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
         )
@@ -71,7 +106,7 @@ fun SignUpScreen(
         OutlinedTextField(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
-            label = { Text("Confirm Password") },
+            label = { Text("Xác Nhận Mật Khẩu") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
         )
@@ -79,7 +114,7 @@ fun SignUpScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Role Selection with Radio Buttons
-        Text("Select Your Role", fontSize = 18.sp)
+        Text("Chọn Vai Trò", fontSize = 18.sp)
         Spacer(modifier = Modifier.height(8.dp))
         RoleSelectionRadioButton(
             selectedRole = selectedRole,
@@ -91,50 +126,53 @@ fun SignUpScreen(
         Button(
             onClick = {
                 when {
-                    name.isEmpty() || emailOrPhone.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() -> {
-                        Toast.makeText(context, "Please fill out all fields", Toast.LENGTH_SHORT).show()
+                    fullName.isEmpty() || username.isEmpty() || email.isEmpty() || phone.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() -> {
+                        Toast.makeText(context, "Vui lòng điền đầy đủ thông tin", Toast.LENGTH_SHORT).show()
                     }
-                    selectedRole.isEmpty() -> {
-                        Toast.makeText(context, "Please select a role", Toast.LENGTH_SHORT).show()
+                    selectedRole == null -> {
+                        Toast.makeText(context, "Vui lòng chọn vai trò", Toast.LENGTH_SHORT).show()
                     }
                     password != confirmPassword -> {
-                        Toast.makeText(context, "Passwords do not match", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Mật khẩu không khớp", Toast.LENGTH_SHORT).show()
                     }
                     !isValidPassword(password) -> {
                         Toast.makeText(
                             context,
-                            "Password must be at least 8 characters, include uppercase, lowercase, digit, and special character.",
+                            "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.",
                             Toast.LENGTH_LONG
                         ).show()
                     }
-                    !isValidContactInfo(emailOrPhone) -> {
-                        Toast.makeText(context, "Enter a valid email or phone number", Toast.LENGTH_SHORT).show()
+                    !isValidEmail(email) -> {
+                        Toast.makeText(context, "Vui lòng nhập địa chỉ email hợp lệ", Toast.LENGTH_SHORT).show()
+                    }
+                    !isValidPhone(phone) -> {
+                        Toast.makeText(context, "Vui lòng nhập số điện thoại hợp lệ", Toast.LENGTH_SHORT).show()
                     }
                     else -> {
                         // Perform sign-up logic
-                        onSignUpSuccess(name, emailOrPhone, password, selectedRole)
+                        onSignUpSuccess(fullName, username, email, phone, password, selectedRole!!)
                     }
                 }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Sign Up")
+            Text("Đăng Ký")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         TextButton(onClick = onSignInClick) {
-            Text("Already have an account? Sign in")
+            Text("Đã có tài khoản? Đăng nhập")
         }
     }
 }
 
 @Composable
 fun RoleSelectionRadioButton(
-    selectedRole: String,
-    onRoleSelected: (String) -> Unit
+    selectedRole: UserType?,
+    onRoleSelected: (UserType) -> Unit
 ) {
-    val roles = listOf("Buyer", "Seller", "Shipper")
+    val roles = UserType.values()
 
     Column {
         roles.forEach { role ->
@@ -149,22 +187,31 @@ fun RoleSelectionRadioButton(
                     onClick = { onRoleSelected(role) }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(role)
+                Text(role.toDisplayName())
             }
         }
     }
 }
 
 fun isValidPassword(password: String): Boolean {
-    val passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#\$%^&+=]).{8,}$"
+    val passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#\\\$%^&+=]).{8,}$"
     return password.matches(passwordPattern.toRegex())
 }
 
-fun isValidContactInfo(contactInfo: String): Boolean {
+fun isValidEmail(email: String): Boolean {
     val emailPattern = android.util.Patterns.EMAIL_ADDRESS
-    return if (emailPattern.matcher(contactInfo).matches()) {
-        true // Valid email
-    } else {
-        contactInfo.matches(Regex("^[0-9]{10,11}$")) // Valid phone number
-    }
+    return emailPattern.matcher(email).matches()
+}
+
+fun isValidPhone(phone: String): Boolean {
+    return phone.matches(Regex("^[0-9]{10,11}$"))
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SignUpScreenPreview() {
+    SignUpScreen(
+        onSignUpSuccess = { _, _, _, _, _, _ -> },
+        onSignInClick = {}
+    )
 }

@@ -14,15 +14,22 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import androidx.compose.ui.tooling.preview.Preview
+
+data class SignUpData(
+    val fullName: String,
+    val username: String,
+    val email: String,
+    val phone: String,
+    val password: String,
+    val role: UserType
+)
 
 @Composable
 fun VerificationCodeScreen(
-    name: String,
-    contactInfo: String,
-    password: String,
-    role: String,
+    signUpData: SignUpData,
     generatedOtp: String,
-    onVerifySuccess: () -> Unit,
+    onVerifySuccess: (SignUpData) -> Unit,
     onResendOtp: () -> String
 ) {
     var otpInput by remember { mutableStateOf("") }
@@ -33,7 +40,7 @@ fun VerificationCodeScreen(
     LaunchedEffect(Unit) {
         Toast.makeText(
             context,
-            "OTP sent to ${if (contactInfo.contains("@")) "email" else "phone"}: $contactInfo. OTP: $currentOtp",
+            "Mã OTP đã được gửi đến số điện thoại: ${signUpData.phone}. Mã OTP: $currentOtp",
             Toast.LENGTH_SHORT
         ).show()
     }
@@ -46,12 +53,12 @@ fun VerificationCodeScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Verify Your Account", fontSize = 24.sp, color = Color.Black)
+        Text("Xác minh tài khoản", fontSize = 24.sp, color = Color.Black)
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            "Enter the OTP sent to your ${if (contactInfo.contains("@")) "email" else "phone"}:",
+            "Nhập mã OTP được gửi đến số điện thoại:",
             fontSize = 14.sp,
             color = Color.Gray
         )
@@ -61,7 +68,7 @@ fun VerificationCodeScreen(
         OutlinedTextField(
             value = otpInput,
             onValueChange = { if (it.length <= 4) otpInput = it },
-            label = { Text("Enter OTP") },
+            label = { Text("Nhập mã OTP") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth()
         )
@@ -71,15 +78,15 @@ fun VerificationCodeScreen(
         Button(
             onClick = {
                 if (otpInput == currentOtp) { // Verify the OTP
-                    onVerifySuccess()
-                    Toast.makeText(context, "Verification successful!", Toast.LENGTH_SHORT).show()
+                    onVerifySuccess(signUpData)
+                    Toast.makeText(context, "Xác minh thành công!", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(context, "Invalid OTP. Please try again.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Mã OTP không đúng. Vui lòng thử lại.", Toast.LENGTH_SHORT).show()
                 }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Verify")
+            Text("Xác minh")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -88,11 +95,34 @@ fun VerificationCodeScreen(
             onClick = {
                 val newOtp = onResendOtp() // Fetch new OTP
                 currentOtp = newOtp // Update the current OTP
-                Toast.makeText(context, "New OTP sent!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Mã OTP mới đã được gửi!", Toast.LENGTH_SHORT).show()
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            Text("Resend OTP")
+            Text("Gửi lại mã OTP")
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun VerificationCodeScreenPreview() {
+    VerificationCodeScreen(
+        signUpData = SignUpData(
+            fullName = "Nguyễn Văn A",
+            username = "nguyenvana",
+            email = "nguyenvana@example.com",
+            phone = "0123456789",
+            password = "password123",
+            role = UserType.CUSTOMER
+        ),
+        generatedOtp = "1234",
+        onVerifySuccess = {
+            // Handle verification success
+        },
+        onResendOtp = {
+            // Simulate OTP resend
+            "5678"
+        }
+    )
 }
