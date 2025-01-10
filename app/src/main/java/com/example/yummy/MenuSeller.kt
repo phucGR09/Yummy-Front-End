@@ -36,12 +36,14 @@ fun removeDiacritics(input: String): String {
 @Preview(showBackground = true)
 @Composable
 fun PreviewMenuHomeScreen() {
+    val orderModel= MenuModel()
+    val viewModel = MenuSellerViewModel(orderModel)
     val navController = rememberNavController()
-    MenuSeller(navController = navController)
+    MenuSeller(navController = navController,viewModel)
 }
 
 @Composable
-fun MenuSeller(navController: NavController, viewModel: MenuSellerViewModel = MenuSellerViewModel()) {
+fun MenuSeller(navController: NavController, viewModel: MenuSellerViewModel) {
     val dishes by viewModel.dishes.collectAsState()
 
     Column(
@@ -81,7 +83,11 @@ fun MenuSeller(navController: NavController, viewModel: MenuSellerViewModel = Me
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(dishes) { dish ->
-                DishItem(dish = dish, onEditClick = { navController.navigate("editDish/${dish.name}") })
+                DishItem(
+                    dish = dish,
+                    onEditClick = { navController.navigate("editDish/${dish.name}") },
+                    onDeleteClick = { navController.navigate("deleteDish/${dish.name}") }
+                )
             }
         }
 
@@ -99,71 +105,86 @@ fun MenuSeller(navController: NavController, viewModel: MenuSellerViewModel = Me
 }
 
 @Composable
-fun DishItem(dish: Dish, onEditClick: () -> Unit) {
-    Row(
+fun DishItem(dish: Dish, onEditClick: () -> Unit, onDeleteClick: () -> Unit) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, Color(0xFFFE724C), RoundedCornerShape(8.dp)) // Viền màu cam
             .padding(16.dp)
     ) {
-        // Hiển thị ảnh món ăn
-        if (!dish.imagePath.isNullOrEmpty()) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(dish.imagePath)
-                    .crossfade(true)
-                    .size(80) // Giới hạn kích thước tải về
-                    .error(R.drawable.banh_trang_tron) // Ảnh mặc định nếu tải thất bại
-                    .build(),
-                contentDescription = dish.name,
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
-        } else {
-            val localImageName = removeDiacritics(dish.name.lowercase().replace(" ", "_"))
-            val localImageRes = getResourceId(localImageName)
-            Image(
-                painter = painterResource(id = localImageRes),
-                contentDescription = dish.name,
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Fit
-            )
-        }
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        // Thông tin món ăn
-        Column(
-            modifier = Modifier.weight(1f)
+        Row(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text(
-                text = dish.name,
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                text = "${dish.price} VNĐ",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.Black // Giá tiền màu đen
-            )
-            dish.description?.let {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
+            // Hiển thị ảnh món ăn
+            if (!dish.imagePath.isNullOrEmpty()) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(dish.imagePath)
+                        .crossfade(true)
+                        .size(80) // Giới hạn kích thước tải về
+                        .error(R.drawable.banh_trang_tron) // Ảnh mặc định nếu tải thất bại
+                        .build(),
+                    contentDescription = dish.name,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
                 )
+            } else {
+                val localImageName = removeDiacritics(dish.name.lowercase().replace(" ", "_"))
+                val localImageRes = getResourceId(localImageName)
+                Image(
+                    painter = painterResource(id = localImageRes),
+                    contentDescription = dish.name,
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Fit
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Thông tin món ăn
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = dish.name,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "${dish.price} VNĐ",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Black // Giá tiền màu đen
+                )
+                dish.description?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                }
             }
         }
 
-        // Nút chỉnh sửa
-        TextButton(onClick = onEditClick) {
-            Text("Chỉnh sửa", color = Color(0xFFFF5722)) // Nút chỉnh sửa màu cam
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Nút chỉnh sửa và xóa
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            TextButton(onClick = onEditClick) {
+                Text("Chỉnh sửa", color = Color(0xFFFF5722)) // Nút chỉnh sửa màu cam
+            }
+            TextButton(onClick = onDeleteClick) {
+                Text("Xóa", color = Color.Red) // Nút xóa màu đỏ
+            }
         }
     }
 }
+
 
 // Hàm lấy Resource ID cho ảnh tĩnh
 @Composable

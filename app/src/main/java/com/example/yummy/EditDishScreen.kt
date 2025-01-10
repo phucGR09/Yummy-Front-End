@@ -33,12 +33,13 @@ import coil.request.ImageRequest
 @Composable
 fun PreviewEditDishScreen() {
     val navController = rememberNavController()
-    val viewModel = MenuSellerViewModel()
+    val orderModel= MenuModel()
+    val viewModel = MenuSellerViewModel(orderModel)
 
     // Món ăn giả lập để chỉnh sửa
     val dish = Dish(
-        item_id = 1,
-        restaurant_id = 0,
+        itemId = 1,
+        restaurantId = 0,
         name = "Bánh tráng trộn",
         price = 25000,
         description = "Món ăn vặt nổi tiếng",
@@ -213,7 +214,13 @@ fun EditDishScreen(
                         description = description,
                         imagePath = imagePath
                     )
-                    viewModel.updateDish(updatedDish)
+                    viewModel.updateDish(updatedDish){ success ->
+                        if (success) {
+                            println("Thay đổi món ăn thành công")
+                        } else {
+                            println("Thay đổi món ăn thất bại")
+                        }
+                    }
                     navController.popBackStack()
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),

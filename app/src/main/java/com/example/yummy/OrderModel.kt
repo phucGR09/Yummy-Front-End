@@ -1,19 +1,19 @@
-import kotlinx.coroutines.delay
+package com.example.yummy
+
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.runBlocking
 import java.time.LocalDateTime
 
 // Data class cho Order
 data class Order(
-    val orderId: Int, // Primary Key
-    val restaurantId: Int, // Foreign Key (Restaurant)
-    val driverId: Int, // Foreign Key (Driver)
-    val customerId: Int, // Foreign Key (Customer)
-    val orderTime: LocalDateTime, // Thời gian đặt hàng
-    val totalPrice: Double, // Tổng tiền đơn hàng
-    var orderStatus: OrderStatus // Trạng thái đơn hàng
+    val orderId: Int,
+    val restaurantId: Int,
+    val driverId: Int,
+    val customerId: Int,
+    val orderTime: LocalDateTime,
+    val totalPrice: Double,
+    var orderStatus: OrderStatus
 )
 
 // Enum class cho trạng thái đơn hàng
@@ -27,85 +27,66 @@ enum class OrderStatus {
 }
 
 class OrderModel {
+    // Danh sách các trạng thái đơn hàng
+    private val _waitingConfirmation = MutableStateFlow<List<Order>>(emptyList())
+    private val _confirmed = MutableStateFlow<List<Order>>(emptyList())
+    private val _waitingDelivery = MutableStateFlow<List<Order>>(emptyList())
+    private val _delivering = MutableStateFlow<List<Order>>(emptyList())
+    private val _delivered = MutableStateFlow<List<Order>>(emptyList())
+    private val _cancelled = MutableStateFlow<List<Order>>(emptyList())
 
-    // Danh sách toàn bộ đơn hàng
-    private val _orders = MutableStateFlow<List<Order>>(emptyList())
-    val orders: StateFlow<List<Order>> = _orders
+    val waitingConfirmation: StateFlow<List<Order>> = _waitingConfirmation
+    val confirmed: StateFlow<List<Order>> = _confirmed
+    val waitingDelivery: StateFlow<List<Order>> = _waitingDelivery
+    val delivering: StateFlow<List<Order>> = _delivering
+    val delivered: StateFlow<List<Order>> = _delivered
+    val cancelled: StateFlow<List<Order>> = _cancelled
 
-    // Danh sách đơn hiện tại
-    private val _currentOrders = MutableStateFlow<List<Order>>(emptyList())
-    val currentOrders: StateFlow<List<Order>> = _currentOrders
-
-    // Danh sách đơn quá khứ
-    private val _pastOrders = MutableStateFlow<List<Order>>(emptyList())
-    val pastOrders: StateFlow<List<Order>> = _pastOrders
-
-    // Hàm giả lập đọc danh sách đơn hàng từ server
+    // Hàm lấy danh sách đơn hàng từ server
     fun getOrdersList(restaurantId: Int) {
-        // Đây là giả lập việc đọc dữ liệu từ server
         val serverData = listOf(
-            Order(1, restaurantId, 101, 201, LocalDateTime.now().minusDays(1), 50000.0, OrderStatus.delivered),
-            Order(2, restaurantId, 102, 202, LocalDateTime.now(), 30000.0, OrderStatus.waiting_confirmation),
-            Order(3, restaurantId, 103, 203, LocalDateTime.now(), 40000.0, OrderStatus.delivering),
-            Order(4, restaurantId, 104, 204, LocalDateTime.now().minusDays(2), 20000.0, OrderStatus.cancelled),
-            Order(5, restaurantId, 105, 205, LocalDateTime.now().minusHours(1), 45000.0, OrderStatus.confirmed)
+            Order(1, restaurantId, 101, 201, LocalDateTime.now().minusHours(3), 50000.0, OrderStatus.confirmed),
+            Order(2, restaurantId, 102, 202, LocalDateTime.now().minusHours(1), 30000.0, OrderStatus.delivering),
+            Order(3, restaurantId, 103, 203, LocalDateTime.now().minusDays(1), 40000.0, OrderStatus.delivered),
+            Order(4, restaurantId, 104, 204, LocalDateTime.now().minusHours(2), 20000.0, OrderStatus.cancelled),
+            Order(5, restaurantId, 105, 205, LocalDateTime.now(), 45000.0, OrderStatus.confirmed),
+            Order(6, restaurantId, 105, 205, LocalDateTime.now(), 45000.0, OrderStatus.waiting_confirmation),
+            Order(7, restaurantId, 105, 205, LocalDateTime.now(), 45000.0, OrderStatus.waiting_confirmation)
         )
-
-        _orders.value = serverData
-        updateFilteredOrders()
+        updateOrders(serverData)
     }
 
-    // Hàm cập nhật trạng thái đơn hàng
-    fun setOrderStatus(orderId: Int, newStatus: OrderStatus) {
-        // Tìm đơn hàng dựa trên orderId
-        val order = _orders.value.find { it.orderId == orderId }
-        if (order != null) {
-            // Cập nhật trên server trước
-            updateOrderOnServer(orderId, newStatus) { success ->
-                if (success) {
-                    // Nếu thành công, cập nhật trong danh sách cục bộ
-                    _orders.update { orders ->
-                        orders.map {
-                            if (it.orderId == orderId) it.copy(orderStatus = newStatus)
-                            else it
-                        }
-                    }
-                    updateFilteredOrders() // Cập nhật danh sách đơn hiện tại và quá khứ
-                } else {
-                    println("Lỗi: Không thể cập nhật trạng thái trên server.")
-                }
-            }
-        } else {
-            println("Lỗi: Không tìm thấy đơn hàng với orderId = $orderId")
+    // Hàm cập nhật các danh sách theo trạng thái
+    private fun updateOrders(orders: List<Order>) {
+        _waitingConfirmation.value = orders.filter { it.orderStatus == OrderStatus.waiting_confirmation }.sortedBy { it.orderTime }
+        _confirmed.value = orders.filter { it.orderStatus == OrderStatus.confirmed }.sortedBy { it.orderTime }
+        _waitingDelivery.value = orders.filter { it.orderStatus == OrderStatus.waiting_delivery }.sortedBy { it.orderTime }
+        _delivering.value = orders.filter { it.orderStatus == OrderStatus.delivering }.sortedBy { it.orderTime }
+        _delivered.value = orders.filter { it.orderStatus == OrderStatus.delivered }.sortedBy { it.orderTime }
+        _cancelled.value = orders.filter { it.orderStatus == OrderStatus.cancelled }.sortedBy { it.orderTime }
+    }
+
+    // Hàm giả lập cập nhật trạng thái lên server
+    fun setStatus(order: Order, newStatus: OrderStatus): Boolean {
+        // Giả lập thành công việc gọi API lên server
+        println("Cập nhật trạng thái của đơn hàng #${order.orderId} thành $newStatus trên server...")
+        // Giả lập việc cập nhật thành công
+        return true
+    }
+
+    // Hàm từ chối đơn hàng
+    fun rejectOrder(order: Order) {
+        if (setStatus(order, OrderStatus.cancelled)) {
+            _waitingConfirmation.update { it.filter { o -> o.orderId != order.orderId } }
+            _cancelled.update { it + order.copy(orderStatus = OrderStatus.cancelled) }
         }
     }
 
-    // Hàm cập nhật trạng thái đơn hàng trên server
-    private fun updateOrderOnServer(orderId: Int, newStatus: OrderStatus, onResult: (Boolean) -> Unit) {
-        // Giả lập gọi API để cập nhật trạng thái
-        runBlocking {
-            try {
-                println("Đang gửi yêu cầu cập nhật trạng thái đơn hàng lên server...")
-                // Giả lập thời gian thực hiện API call
-                delay(1000)
-                println("Cập nhật thành công: Đơn hàng $orderId -> Trạng thái $newStatus")
-                onResult(true) // Trả về thành công
-            } catch (e: Exception) {
-                e.printStackTrace()
-                onResult(false) // Trả về thất bại
-            }
+    // Hàm xác nhận đơn hàng
+    fun confirmOrder(order: Order) {
+        if (setStatus(order, OrderStatus.confirmed)) {
+            _waitingConfirmation.update { it.filter { o -> o.orderId != order.orderId } }
+            _confirmed.update { it + order.copy(orderStatus = OrderStatus.confirmed) }
         }
-    }
-
-    // Hàm cập nhật danh sách đơn hiện tại và quá khứ
-    private fun updateFilteredOrders() {
-        val allOrders = _orders.value
-        _currentOrders.value = allOrders.filter {
-            it.orderStatus !in listOf(OrderStatus.delivered, OrderStatus.cancelled)
-        }.sortedByDescending { it.orderTime }
-
-        _pastOrders.value = allOrders.filter {
-            it.orderStatus in listOf(OrderStatus.delivered, OrderStatus.cancelled)
-        }.sortedByDescending { it.orderTime }
     }
 }
