@@ -17,6 +17,54 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.yummy.ui.theme.YummyTheme
 
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+
+
+
+//class MainActivity : ComponentActivity() {
+//    private val apiService = ApiClient.instance.create(ApiService::class.java)
+//
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//
+//        // Tạo dữ liệu yêu cầu
+//        val createMenuItemRequest = CreateMenuItemRequest(
+//            name = "Pasta Carbonara",
+//            price = 12.99,
+//            description = "Classic Italian pasta with creamy sauce.",
+//            imageUrl = "https://example.com/pasta-carbonara.jpg",
+//            restaurantId = 1
+//        )
+//
+//        // Gửi yêu cầu đến backend
+//        apiService.createMenuItem(createMenuItemRequest).enqueue(object : Callback<CreateMenuItemResponse> {
+//            override fun onResponse(call: Call<CreateMenuItemResponse>, response: Response<CreateMenuItemResponse>) {
+//                if (response.isSuccessful) {
+//                    val menuItem = response.body()?.result
+//                    Toast.makeText(
+//                        this@MainActivity,
+//                        "Created: ${menuItem?.name} (ID: ${menuItem?.id})",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                } else {
+//                    Toast.makeText(
+//                        this@MainActivity,
+//                        "Failed to create menu item: ${response.code()}",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                }
+//            }
+//
+//            override fun onFailure(call: Call<CreateMenuItemResponse>, t: Throwable) {
+//                Toast.makeText(this@MainActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+//            }
+//        })
+//    }
+//}
+
+
 //class MainActivity : ComponentActivity() {
 //    override fun onCreate(savedInstanceState: Bundle?) {
 //        super.onCreate(savedInstanceState)
@@ -263,38 +311,38 @@ fun HomeScreenPreview() {
 
 
 
-//@Composable
-//fun AppNavGraph(navController: NavHostController, viewModel: MenuSellerViewModel) {
-//    NavHost(navController = navController, startDestination = "menu_seller_screen") {
-//        composable("menu_seller_screen") {
-//            MenuSeller(
-//                navController = navController,
-//                viewModel = viewModel
-//            )
-//        }
-//
-//        composable("addDish") {
-//            AddDishScreen(navController = navController,viewModel)
-//        }
-//
-//        composable("editDish/{dishName}") { backStackEntry ->
-//            val dishName = backStackEntry.arguments?.getString("dishName") ?: ""
-//            val dish = viewModel.dishes.collectAsState().value.find { it.name == dishName }
-//            if (dish != null) {
-//                EditDishScreen(navController = navController, dish = dish, viewModel)
-//            }
-//        }
-//
-//        composable("deleteDish/{dishName}") { backStackEntry ->
-//            val dishName = backStackEntry.arguments?.getString("dishName") ?: ""
-//            val dish = viewModel.dishes.collectAsState().value.find { it.name == dishName }
-//            if (dish != null) {
-//                DeleteDishScreen(
-//                    navController = navController,
-//                    dish = dish,
-//                    viewModel = viewModel
-//                )
-//            }
-//        }
-//    }
-//}
+@Composable
+fun AppNavGraph(navController: NavHostController, viewModel: MenuSellerViewModel) {
+    NavHost(navController = navController, startDestination = "menu_seller_screen") {
+        composable("menu_seller_screen") {
+            MenuSeller(
+                navController = navController,
+                viewModel = viewModel
+            )
+        }
+
+        composable("addDish") {
+            AddDishScreen(navController = navController,viewModel)
+        }
+
+        composable("editDish/{dishName}") { backStackEntry ->
+            val dishName = backStackEntry.arguments?.getString("dishName") ?: ""
+            val dish = viewModel.dishes.collectAsState().value.find { it.name == dishName }
+            if (dish != null) {
+                EditDishScreen(navController = navController, dish = dish, viewModel)
+            }
+        }
+
+        composable("deleteDish/{dishName}") { backStackEntry ->
+            val dishName = backStackEntry.arguments?.getString("dishName") ?: ""
+            val dish = viewModel.dishes.collectAsState().value.find { it.name == dishName }
+            if (dish != null) {
+                DeleteDishScreen(
+                    navController = navController,
+                    dish = dish,
+                    viewModel = viewModel
+                )
+            }
+        }
+    }
+}
