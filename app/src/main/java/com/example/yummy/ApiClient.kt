@@ -25,16 +25,20 @@ class LocalTimeAdapter : JsonDeserializer<LocalTime>, JsonSerializer<LocalTime> 
 }
 
 object ApiClient {
-    private const val BASE_URL = "http://192.168.229.110:8080/api/v1/"  // Thay bằng địa chỉ IP backend
+    private const val BASE_URL = "http://192.168.1.3:8080/api/v1/"  // Thay bằng địa chỉ IP backend
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
     private var authToken = "eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJZdW1teS1iYWNrZW5kLXRlYW0iLCJzdWIiOiJhZG1pbiIsImV4cCI6MTczNjYxMDgwNiwiaWF0IjoxNzM2NTI0NDA2LCJzY29wZSI6IkFETUlOIn0.7v5IMTvMWx1_MRtf9YJsaA-yP89JWpTLVPWrN5VYqj9xKyN_33AykUQSuKucpJAKHMJEiCco9ImZBDpd59Mw2w"
-
+    private var restaurantId = 1
     fun setAuthToken(token: String) {
         authToken = token
+    }
+
+    fun setRestaurantId(id: Int){
+        restaurantId = id
     }
 
     private val authInterceptor = Interceptor { chain ->
