@@ -78,8 +78,6 @@ import retrofit2.Response
 //
 //        // Khởi tạo MenuModel và ViewModel
 //        val menuModel = MenuModel()
-//        val viewModel = MenuSellerViewModel(menuModel)
-//
 //        // Sử dụng lifecycleScope để đảm bảo an toàn với vòng đời Activity
 //        lifecycleScope.launch {
 //            val success = menuModel.getDishes()
@@ -90,10 +88,62 @@ import retrofit2.Response
 //            }
 //        }
 //
+//
+//
 //        setContent {
 //            YummyTheme {
+////                val navController = rememberNavController()
+////                AppNavGraph(navController = navController, viewModel = viewModel)
 //                val navController = rememberNavController()
-//                AppNavGraph(navController = navController, viewModel = viewModel)
+//                val storeviewModel = StoreViewModel()
+//                val reviewviewModel = ReviewViewModel()
+//                val orderModel = OrderModel()
+//                val MenuSellerviewModel = MenuSellerViewModel(menuModel)
+//                val OrderSellerviewModel = OrderSellerViewModel(orderModel)
+//                val AvenueSellerviewModel = AvenueSellerViewModel(orderModel)
+//
+//                NavHost(navController = navController, startDestination = "store_home") {
+//                    composable("store_home") { StoreHomeScreen(navController,storeviewModel) }
+//                    composable("customer_reviews") { ReviewScreen(navController,reviewviewModel) }
+//                    composable("menu") { MenuSeller(navController,MenuSellerviewModel) }
+//                    composable("orders") { OrderSellerScreen(navController,OrderSellerviewModel) }
+//                    composable("revenue") { AvenueSellerScreen(navController,AvenueSellerviewModel) }
+//                    composable(  "addDish") { AddDishScreen(navController,MenuSellerviewModel)}
+//                    composable("editDish/{dishName}") { backStackEntry ->
+//                        val dishName = backStackEntry.arguments?.getString("dishName") ?: ""
+//                        val dish = MenuSellerviewModel.dishes.collectAsState().value.find { it.name == dishName }
+//                        if (dish != null) {
+//                            com.example.yummy.EditDishScreen(
+//                                navController = navController,
+//                                dish = dish,
+//                                MenuSellerviewModel
+//                            )
+//                        }
+//                    }
+//                    composable("deleteDish/{dishName}") { backStackEntry ->
+//                        val dishName = backStackEntry.arguments?.getString("dishName") ?: ""
+//                        val dish = MenuSellerviewModel.dishes.collectAsState().value.find { it.name == dishName }
+//                        if (dish != null) {
+//                            DeleteDishScreen(
+//                                navController = navController,
+//                                dish = dish,
+//                                viewModel = MenuSellerviewModel
+//                            )
+//                        }
+//                    }
+//                    composable("cancel_order/{orderId}") { backStackEntry ->
+//                        val orderId = backStackEntry.arguments?.getString("orderId")?.toIntOrNull()
+//                        if (orderId != null) {
+//                            CancelOrderScreen(
+//                                navController = navController,
+//                                orderId = orderId,
+//                                onCancelOrder = { id, reason ->
+//                                    OrderSellerviewModel.rejectOrderWithReason(id, reason)
+//                                }
+//                            )
+//                        }
+//                    }
+//                }
 //            }
 //        }
 //    }
@@ -424,38 +474,4 @@ fun HomeScreenPreview() {
 
 
 
-@Composable
-fun AppNavGraph(navController: NavHostController, viewModel: MenuSellerViewModel) {
-    NavHost(navController = navController, startDestination = "menu_seller_screen") {
-        composable("menu_seller_screen") {
-            MenuSeller(
-                navController = navController,
-                viewModel = viewModel
-            )
-        }
 
-        composable("addDish") {
-            AddDishScreen(navController = navController,viewModel)
-        }
-
-        composable("editDish/{dishName}") { backStackEntry ->
-            val dishName = backStackEntry.arguments?.getString("dishName") ?: ""
-            val dish = viewModel.dishes.collectAsState().value.find { it.name == dishName }
-            if (dish != null) {
-                EditDishScreen(navController = navController, dish = dish, viewModel)
-            }
-        }
-
-        composable("deleteDish/{dishName}") { backStackEntry ->
-            val dishName = backStackEntry.arguments?.getString("dishName") ?: ""
-            val dish = viewModel.dishes.collectAsState().value.find { it.name == dishName }
-            if (dish != null) {
-                DeleteDishScreen(
-                    navController = navController,
-                    dish = dish,
-                    viewModel = viewModel
-                )
-            }
-        }
-    }
-}
