@@ -31,22 +31,40 @@ class AuthenticationViewModel(private val authenticationApi: AuthenticationApi) 
     val createDriverResult = mutableStateOf<ApiResponse<DeliveryDriverResponse>?>(null)
     val createRestaurantOwnerResult = mutableStateOf<ApiResponse<RestaurantOwnerResponse>?>(null)
 
-    // Đăng ký người dùng mới
-    fun registerUser(request: RegisterRequest) {
-        authenticationApi.register(request).enqueue(object : Callback<ApiResponse<UserResponse>> {
-            override fun onResponse(call: Call<ApiResponse<UserResponse>>, response: Response<ApiResponse<UserResponse>>) {
-                if (response.isSuccessful) {
-                    _registerResult.value = response.body()
+    fun resetRegisterResult() {
+        _registerResult.value = null
+    }
+
+
+    fun registerUser(
+        request: RegisterRequest,
+        onSuccess: (UserType) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        authenticationApi.register(request).enqueue(object : retrofit2.Callback<ApiResponse<UserResponse>> {
+            override fun onResponse(
+                call: retrofit2.Call<ApiResponse<UserResponse>>,
+                response: retrofit2.Response<ApiResponse<UserResponse>>
+            ) {
+                if (response.isSuccessful && response.body() != null) {
+                    val apiResponse = response.body()!!
+                    if (apiResponse.code == 200 && apiResponse.result != null) {
+                        val userType = UserType.valueOf(request.userType.uppercase())
+                        onSuccess(userType) // Gửi loại vai trò user về
+                    } else {
+                        onFailure(apiResponse.message ?: "Unknown error occurred")
+                    }
                 } else {
-                    Log.e("Authentication", "Register Failed: ${response.code()}")
+                    onFailure("Register failed with code: ${response.code()} and message: ${response.message()}")
                 }
             }
 
-            override fun onFailure(call: Call<ApiResponse<UserResponse>>, t: Throwable) {
-                Log.e("Authentication", "Register Failed: ${t.message}")
+            override fun onFailure(call: retrofit2.Call<ApiResponse<UserResponse>>, t: Throwable) {
+                onFailure("Failed to connect to the server: ${t.message}")
             }
         })
     }
+
 
     // Đăng nhập
     fun loginUser(request: AuthenticateRequest) {

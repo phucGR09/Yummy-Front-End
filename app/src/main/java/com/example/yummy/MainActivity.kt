@@ -99,6 +99,7 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("SignUpScreen"){
                         SignUpScreen(
+                            navController,
                             onSignUpSuccess = {
                                 navController.navigate("SignInScreen")
                             },

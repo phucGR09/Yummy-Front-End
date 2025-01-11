@@ -52,6 +52,9 @@ fun SignInScreen(
     onSignInSuccess: (String) -> Unit,
     onSignUpClick: () -> Unit
 ) {
+    val apiService = ApiClient.instance.create(ApiService::class.java)
+
+
     val context = LocalContext.current
     val authenticationApi = AuthenticationApi.create()  // Initialize your API client
     val authenticationViewModel = viewModel<AuthenticationViewModel>(
@@ -70,7 +73,9 @@ fun SignInScreen(
 
             val token = authenticateResponse.token // Trích xuất token từ response
             val userType = authenticateResponse.userType // Lấy userType từ response
+            ApiClient.setAuthToken(token)
             // Lưu token vào SharedPreferences
+
             val sharedPreferences = context.getSharedPreferences("auth_prefs", MODE_PRIVATE)
             sharedPreferences.edit().putString("auth_token", token).putString("user_type", userType).apply()
 

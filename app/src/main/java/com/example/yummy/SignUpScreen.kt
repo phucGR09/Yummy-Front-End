@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
+import androidx.navigation.NavController
 import com.example.yummy.models.AuthenticateRequest
 import com.example.yummy.models.RegisterRequest
 import com.example.yummy.viewmodel.AuthenticationViewModel
@@ -46,6 +47,7 @@ fun UserType.toDisplayName(): String {
 
 @Composable
 fun SignUpScreen(
+    navController: NavController,
     onSignUpSuccess: () -> Unit,
     onSignInClick: () -> Unit
 ) {
@@ -197,7 +199,38 @@ fun SignUpScreen(
                         )
                         // Log thông tin request
                         Log.d("SignUpScreen", "Register Request: $request")
-                        authenticationViewModel.registerUser(request)
+                        authenticationViewModel.registerUser(
+                            request,
+                            onSuccess = { userType ->
+                                Toast.makeText(context, "Gửi thành công", Toast.LENGTH_SHORT).show()
+                                isLoading = false
+
+                                // Điều hướng dựa trên vai trò người dùng
+                                when (userType) {
+                                    UserType.CUSTOMER -> {
+                                        val route = "ProfileBuyerScreen/$username/$fullName/$email/$phone/"
+                                        navController.navigate(route)
+                                    }
+                                    UserType.RESTAURANT_OWNER -> {
+                                        val address = "default_address" // Giá trị mặc định
+                                        val openingHours = "18:00:00"
+                                        val taxCode = "default_tax_code"
+                                        val route = "ProfileSellerScreen/$username/$fullName/$address/$openingHours/$taxCode/$email/$phone/"
+                                        navController.navigate(
+                                            "ProfileSellerScreen/$username/$fullName/$address/$openingHours/$taxCode/$email/$phone"
+                                        )
+                                    }
+                                    UserType.DELIVERY_DRIVER -> {
+                                        Toast.makeText(context, "Chức năng dành cho người giao hàng chưa có.", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            },
+                            onFailure = { error ->
+                                Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                                isLoading = false
+                            }
+                        )
+
 
                     }
                 }
