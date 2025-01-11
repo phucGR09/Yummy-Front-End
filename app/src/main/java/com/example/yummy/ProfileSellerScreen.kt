@@ -1,7 +1,10 @@
 package com.example.yummy
 
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -9,20 +12,31 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun ProfileSellerScreen(
-    name: String,
-    contactInfo: String,
-    onSave: (updatedName: String, updatedStoreName: String) -> Unit,
+    username: String,
+    fullName: String,
+    address: String,
+    openingHours: String,
+    taxCode: String,
+    email: String,
+    phoneNumber: String,
+    onSave: (String, String, String, String, String, String) -> Unit
 ) {
-    var updatedName by remember { mutableStateOf(name) }
-    var storeName by remember { mutableStateOf("") }
-    val context = LocalContext.current
+    var updatedFullName by remember { mutableStateOf(fullName) }
+    var updatedAddress by remember { mutableStateOf(address) }
+    var updatedOpeningHours by remember { mutableStateOf(openingHours) }
+    var updatedTaxCode by remember { mutableStateOf(taxCode) }
+    var updatedEmail by remember { mutableStateOf(email) }
+    var updatedPhoneNumber by remember { mutableStateOf(phoneNumber) }
 
     Column(
         modifier = Modifier
@@ -30,52 +44,112 @@ fun ProfileSellerScreen(
             .padding(16.dp)
             .background(Color.White),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Top
     ) {
-        Text("Seller Profile", fontSize = 24.sp, color = Color.Black)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = updatedName,
-            onValueChange = { updatedName = it },
-            label = { Text("Your Name") },
-            modifier = Modifier.fillMaxWidth()
+        // Avatar Image at the top
+        Image(
+            painter = painterResource(id = R.drawable.face), // Replace with your avatar resource
+            contentDescription = "Avatar",
+            modifier = Modifier
+                .size(100.dp)
+                .padding(bottom = 16.dp),
+            contentScale = ContentScale.Crop
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = storeName,
-            onValueChange = { storeName = it },
-            label = { Text("Store Name") },
-            modifier = Modifier.fillMaxWidth()
-        )
+        Text("Hồ sơ người bán hàng", fontSize = 24.sp, color = Color.Black)
 
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
-            value = contactInfo,
+            value = username,
             onValueChange = {},
-            label = { Text("Contact Info") },
+            label = { Text("Tên đăng nhập") },
             modifier = Modifier.fillMaxWidth(),
-            enabled = false // Disable editing for contact info
+            enabled = false // Disable editing for username
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = updatedFullName,
+            onValueChange = { updatedFullName = it },
+            label = { Text("Họ và tên") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = updatedEmail,
+            onValueChange = { updatedEmail = it },
+            label = { Text("Email") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = updatedPhoneNumber,
+            onValueChange = { updatedPhoneNumber = it },
+            label = { Text("Số điện thoại") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = updatedAddress,
+            onValueChange = { updatedAddress = it },
+            label = { Text("Địa chỉ") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = updatedOpeningHours,
+            onValueChange = { updatedOpeningHours = it },
+            label = { Text("Giờ mở cửa") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = updatedTaxCode,
+            onValueChange = { updatedTaxCode = it },
+            label = { Text("Mã số thuế") },
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = {
-                if (updatedName.isEmpty() || storeName.isEmpty()) {
-                    Toast.makeText(context, "Please fill out all fields.", Toast.LENGTH_SHORT).show()
-                } else {
-                    onSave(updatedName, storeName)
-                    Toast.makeText(context, "Seller Profile updated successfully!", Toast.LENGTH_SHORT).show()
-                }
+                onSave(updatedFullName, updatedAddress, updatedOpeningHours, updatedTaxCode, updatedEmail, updatedPhoneNumber)
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Save")
+            Text("LƯU")
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProfileSellerScreenPreview() {
+    ProfileSellerScreen(
+        username = "nguyenvana",
+        fullName = "Nguyễn Văn A",
+        address = "123 Đường ABC, Phường XYZ, Thành phố QWE",
+        openingHours = "8:00 - 17:00",
+        taxCode = "123456789",
+        email = "nguyenvana@example.com",
+        phoneNumber = "0123456789",
+        onSave = { fullName, address, openingHours, taxCode, email, phoneNumber ->
+            // Mock save action for preview
+        }
+    )
 }

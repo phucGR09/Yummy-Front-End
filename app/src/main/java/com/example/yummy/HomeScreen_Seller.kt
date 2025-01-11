@@ -28,11 +28,12 @@ import androidx.navigation.compose.rememberNavController
 @Composable
 fun PreviewStoreHomeScreen() {
     val navController = rememberNavController()
-    StoreHomeScreen(navController = navController)
+    val viewModel = StoreViewModel()
+    StoreHomeScreen(navController = navController,viewModel)
 }
 
 @Composable
-fun StoreHomeScreen(navController: NavController, viewModel: StoreViewModel = StoreViewModel()) {
+fun StoreHomeScreen(navController: NavController, viewModel: StoreViewModel) {
     val storeInfo = viewModel.storeInfo
     val products by viewModel.products.collectAsState()
     val isProductListEmpty by viewModel.isProductListEmpty.collectAsState()
@@ -106,16 +107,20 @@ fun StoreHomeScreen(navController: NavController, viewModel: StoreViewModel = St
             modifier = Modifier.fillMaxWidth()
         ) {
             val functions = listOf(
-                Pair("Phản hồi", R.drawable.feedback_icon),
-                Pair("Thực đơn", R.drawable.menu_icon),
-                Pair("Đơn hàng", R.drawable.order_icon),
-                Pair("Lịch sử", R.drawable.history_icon),
-                Pair("Doanh thu", R.drawable.revenue_icon)
+                Triple("Phản hồi", R.drawable.feedback_icon, "customer_reviews"),
+                Triple("Thực đơn", R.drawable.menu_icon, "menu"),
+                Triple("Đơn hàng", R.drawable.order_icon, "orders"),
+                Triple("Lịch sử", R.drawable.history_icon, "orders"), // Thay đổi nếu có màn hình lịch sử riêng
+                Triple("Doanh thu", R.drawable.revenue_icon, "revenue")
             )
-            functions.forEach { (name, icon) ->
+            functions.forEach { (name, icon, route) ->
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable {
+                            navController.navigate(route) // Điều hướng đến trang tương ứng
+                        }
                 ) {
                     Icon(
                         painter = painterResource(id = icon),

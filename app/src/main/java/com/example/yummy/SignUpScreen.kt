@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -25,8 +26,22 @@ import com.example.yummy.viewmodel.AuthenticationViewModelFactory
 import com.example.yummy.api.AuthenticationApi
 import java.util.Locale
 import com.example.yummy.models.UserType
+enum class UserType {
+    CUSTOMER, RESTAURANT_OWNER, DELIVERY_DRIVER
+}
 
+// Extension function to map UserType to Vietnamese display names
+fun UserType.toDisplayName(): String {
+    return when (this) {
+        UserType.CUSTOMER -> "Người Mua hàng"
+        UserType.RESTAURANT_OWNER -> "Người Bán Hàng"
+        UserType.DELIVERY_DRIVER -> "Người Giao Hàng"
+        UserType.ADMIN -> TODO()
+    }
+}
 @OptIn(UnstableApi::class)
+
+
 @Composable
 fun SignUpScreen(
     onSignUpSuccess: () -> Unit,
@@ -66,14 +81,14 @@ fun SignUpScreen(
             .background(Color.White),
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Sign Up", fontSize = 24.sp)
+        Text("Đăng Ký", fontSize = 24.sp)
 
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = username,
             onValueChange = { username = it },
-            label = { Text("Username") },
+            label = { Text("Tên Đăng Nhập") },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -111,7 +126,7 @@ fun SignUpScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
+            label = { Text("Mật Khẩu") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
         )
@@ -121,7 +136,7 @@ fun SignUpScreen(
         OutlinedTextField(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
-            label = { Text("Confirm Password") },
+            label = { Text("Xác Nhận Mật Khẩu") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth()
         )
@@ -129,9 +144,8 @@ fun SignUpScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Role Selection with Radio Buttons
-        Text("Select Your Role", fontSize = 18.sp)
+        Text("Chọn Vai Trò", fontSize = 18.sp)
         Spacer(modifier = Modifier.height(8.dp))
-
         RoleSelectionRadioButton(
             selectedRole = selectedRole,
             onRoleSelected = { role -> selectedRole = role }
@@ -154,16 +168,16 @@ fun SignUpScreen(
                         Toast.makeText(context, "Please select a role", Toast.LENGTH_SHORT).show()
                     }
                     password != confirmPassword -> {
-                        Toast.makeText(context, "Passwords do not match", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Mật khẩu không khớp", Toast.LENGTH_SHORT).show()
                     }
                     !isValidPassword(password) -> {
                         Toast.makeText(
                             context,
-                            "Password must be at least 8 characters, include uppercase, lowercase, digit, and special character.",
+                            "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.",
                             Toast.LENGTH_LONG
                         ).show()
                     }
-                    !isValidContactInfo(email) -> {
+                    !isValidEmail(email) -> {
                         Toast.makeText(context, "Enter a valid email address", Toast.LENGTH_SHORT).show()
                     }
                     !isValidPhoneNumber(phone) -> {
@@ -197,12 +211,10 @@ fun SignUpScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         TextButton(onClick = onSignInClick) {
-            Text("Already have an account? Sign in")
+            Text("Đã có tài khoản? Đăng nhập")
         }
     }
 }
-
-
 
 @Composable
 fun RoleSelectionRadioButton(
@@ -224,8 +236,8 @@ fun RoleSelectionRadioButton(
                     onClick = { onRoleSelected(role) } // Callback với role được chọn
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(role.name.replace("_", " ").lowercase()
-                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() })
+
+                Text(role.toDisplayName())
             }
         }
     }
@@ -236,15 +248,24 @@ fun isValidPhoneNumber(phone: String): Boolean {
 }
 
 fun isValidPassword(password: String): Boolean {
-    val passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#\$%^&+=]).{8,}$"
+    val passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=]).{8,}$"
     return password.matches(passwordPattern.toRegex())
 }
 
-fun isValidContactInfo(contactInfo: String): Boolean {
+fun isValidEmail(email: String): Boolean {
     val emailPattern = android.util.Patterns.EMAIL_ADDRESS
-    return if (emailPattern.matcher(contactInfo).matches()) {
-        true // Valid email
-    } else {
-        contactInfo.matches(Regex("^[0-9]{10,11}$")) // Valid phone number
-    }
+    return emailPattern.matcher(email).matches()
 }
+
+fun isValidPhone(phone: String): Boolean {
+    return phone.matches(Regex("^[0-9]{10,11}$"))
+}
+
+//@Preview(showBackground = true)
+//@Composable
+//fun SignUpScreenPreview() {
+//    SignUpScreen(
+//        onSignUpSuccess = { _, _, _, _, _, _ -> },
+//        onSignInClick = {}
+//    )
+//}

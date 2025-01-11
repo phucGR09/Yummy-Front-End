@@ -39,7 +39,8 @@ import androidx.compose.runtime.setValue
 @Composable
 fun PreviewAddDishScreen() {
     val navController = rememberNavController()
-    val viewModel = MenuSellerViewModel()
+    val orderModel= MenuModel()
+    val viewModel = MenuSellerViewModel(orderModel)
 
     // Hiển thị màn hình thêm món ăn
     AddDishScreen(navController = navController, viewModel = viewModel)
@@ -65,8 +66,8 @@ fun AddDishScreen(
     ) { uri: Uri? ->
         uri?.let { selectedUri ->
             isUploading = true // Bắt đầu upload ảnh
-            viewModel.updateImage(Dish(0,1,name, price.toIntOrNull() ?: 0, description, null), selectedUri.toString()) { success ->
-                isUploading = false // Kết thúc upload
+            viewModel.updateImage(Dish(-1,SharedData.restaurantId,name, price.toIntOrNull() ?: 0, description, null), selectedUri.toString()) { success ->
+                isUploading = false // Kết thúc uploa
                 if (success) {
                     imagePath = selectedUri.toString() // Cập nhật ảnh hiển thị
                 } else {
@@ -195,14 +196,20 @@ fun AddDishScreen(
                 onClick = {
                     if (name.isNotEmpty() && price.isNotEmpty()) {
                         val newDish = Dish(
-                            item_id = 0,
-                            restaurant_id =1,
+                            itemId = -1,
+                            restaurantId =SharedData.restaurantId,
                             name = name,
                             price = price.toIntOrNull() ?: 0,
                             description = description,
                             imagePath = imagePath
                         )
-                        viewModel.addDish(newDish)
+                        viewModel.addDish(newDish){ success ->
+                            if (success) {
+                                println("Thêm món ăn thành công")
+                            } else {
+                                println("Thêm món ăn thất bại")
+                            }
+                        }
                         navController.popBackStack()
                     } else {
                         Toast.makeText(context, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show()

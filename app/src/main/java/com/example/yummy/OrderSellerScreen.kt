@@ -1,5 +1,6 @@
 package com.example.yummy
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -41,8 +42,8 @@ fun OrderSellerScreen(navController: NavController, viewModel: OrderSellerViewMo
         viewModel.fetchOrders(restaurantId = 123) // Thay 123 bằng ID nhà hàng của bạn
     }
     val waitingConfirmation by viewModel.waitingConfirmation.collectAsState()
-    val waitingDelivery by viewModel.waitingDelivery.collectAsState()
     val delivering by viewModel.delivering.collectAsState()
+    val confirmed by viewModel.confirmed.collectAsState()
 
     var selectedTabIndex by remember { mutableStateOf(0) } // Quản lý tab được chọn
 
@@ -114,21 +115,29 @@ fun OrderSellerScreen(navController: NavController, viewModel: OrderSellerViewMo
             0 -> {
                 // Nội dung "Đơn hiện tại"
                 Text(
-                    text = "Đang chờ lấy hàng",
+                    text = "Đang chuẩn bị",
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(16.dp)
                 )
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    itemsIndexed(waitingDelivery) { index, order ->
-                        OrderItem(orderId = order.orderId, status = "Đang chuẩn bị")
-                        if (index < waitingDelivery.size - 1) {
+                    itemsIndexed(confirmed) { index, order ->
+                        OrderItemWithActions(
+                            orderId = order.orderId,
+                            status = "Đang chuẩn bị",
+                            actions = listOf("Liên hệ", "Hủy đơn"),
+                            onActionClick = { action ->
+                                if (action == "Hủy đơn") {
+                                    navController.navigate("cancel_order/${order.orderId}")
+                                }
+                            }
+                        )
+                        if (index <confirmed.size - 1) {
                             Divider(color = Color.Gray, thickness = 1.dp)
                         }
                     }
                 }
 
-                // Lằn phân cách màu cam giữa các nhóm
-                if (waitingDelivery.isNotEmpty() && delivering.isNotEmpty()) {
+                if (confirmed.isNotEmpty() && delivering.isNotEmpty()) {
                     Divider(color = Color(0xFFFF5722), thickness = 2.dp)
                 }
 
@@ -139,7 +148,14 @@ fun OrderSellerScreen(navController: NavController, viewModel: OrderSellerViewMo
                 )
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
                     itemsIndexed(delivering) { index, order ->
-                        OrderItem(orderId = order.orderId, status = "Đang giao")
+                        OrderItemWithActions(
+                            orderId = order.orderId,
+                            status = "Đang giao",
+                            actions = listOf("Liên hệ", "Theo dõi đơn hàng"),
+                            onActionClick = { action ->
+                                // Điều hướng đến trang liên hệ hoặc theo dõi đơn hàng
+                            }
+                        )
                         if (index < delivering.size - 1) {
                             Divider(color = Color.Gray, thickness = 1.dp)
                         }
@@ -156,7 +172,17 @@ fun OrderSellerScreen(navController: NavController, viewModel: OrderSellerViewMo
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
                     if (waitingConfirmation.isNotEmpty()) {
                         itemsIndexed(waitingConfirmation) { index, order ->
-                            OrderItem(orderId = order.orderId, status = "Đang chờ xác nhận")
+                            OrderItemWithActions(
+                                orderId = order.orderId,
+                                status = "Đang chờ xác nhận",
+                                actions = listOf("Từ chối đơn hàng", "Xác nhận đơn hàng"),
+                                onActionClick = { action ->
+                                    when (action) {
+                                        "Từ chối đơn hàng" -> viewModel.rejectOrder(order)
+                                        "Xác nhận đơn hàng" -> viewModel.confirmOrder(order)
+                                    }
+                                }
+                            )
                             if (index < waitingConfirmation.size - 1) {
                                 Divider(color = Color.Gray, thickness = 1.dp)
                             }
@@ -177,17 +203,65 @@ fun OrderSellerScreen(navController: NavController, viewModel: OrderSellerViewMo
 }
 
 @Composable
-fun OrderItem(orderId: Int, status: String) {
-    Row(
+fun OrderItemWithActions(
+    orderId: Int,
+    status: String,
+    actions: List<String>,
+    onActionClick: (String) -> Unit
+) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(8.dp)
     ) {
-        Text(text = "Đơn #$orderId", style = MaterialTheme.typography.bodyMedium)
-        Text(text = status, color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "Đơn #$orderId", style = MaterialTheme.typography.bodyMedium)
+            Text(text = status, color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+        }
+
+        // Thêm các nút hành động
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            actions.forEachIndexed { index, action ->
+                Button(
+                    onClick = { onActionClick(action) },
+                    colors = when (action) {
+                        "Liên hệ", "Từ chối đơn hàng" -> ButtonDefaults.buttonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black
+                        )
+                        "Hủy đơn", "Xác nhận đơn hàng", "Theo dõi đơn hàng" -> ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFFF5722),
+                            contentColor = Color.White
+                        )
+                        else -> ButtonDefaults.buttonColors()
+                    },
+                    border = when (action) {
+                        "Liên hệ", "Từ chối đơn hàng" -> BorderStroke(1.dp, Color.Gray)
+                        else -> null
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = if (index < actions.size - 1) 8.dp else 0.dp)
+                ) {
+                    Text(text = action, style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
     }
 }
+
+
+
 
 
