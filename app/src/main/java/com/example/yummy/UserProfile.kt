@@ -40,10 +40,10 @@ import androidx.navigation.NavController
 @Composable
 fun UserProfile(
     navController: NavController,
-    sharedPreferences: SharedPreferences
+    token: String
 ) {
-    val name = sharedPreferences.getString("name", "John Doe") ?: "John Doe"
-    val email = sharedPreferences.getString("email", "johndoe@example.com") ?: "johndoe@example.com"
+    val name = "John Doe"
+    val email = "johndoe@example.com"
 
     Scaffold(
         topBar = {
@@ -120,7 +120,7 @@ fun UserProfile(
             // Sign Out Button
             Button(
                 onClick = {
-                    sharedPreferences.edit().clear().apply()
+                    //sharedPreferences.edit().clear().apply()
                     navController.navigate("LoginScreen") {
                         popUpTo(0) // Clear back stack
                     }

@@ -31,16 +31,36 @@ import retrofit2.Response
 
 
 
+
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        val menuModel = MenuModel()
+        // Sử dụng lifecycleScope để đảm bảo an toàn với vòng đời Activity
+        lifecycleScope.launch {
+            val success = menuModel.getDishes()
+            if (success) {
+                println("Danh sách món ăn được tải thành công khi khởi động ứng dụng.")
+            } else {
+                println("Không thể tải danh sách món ăn khi khởi động.")
+            }
+        }
         super.onCreate(savedInstanceState)
+
         setContent {
             YummyTheme(darkTheme = false) {
                 val navController = rememberNavController()
                 var cartItems by remember { mutableStateOf(emptyList<CartItem>()) }
-                val sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+                // here
+                //val sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE)
                 val userAddress = "41, Nguyễn Văn Cừ, P4, Q5, TPHCM"
-                val storeViewModel: StoreViewModel = viewModel()
+                val storeviewModel = StoreViewModel()
+                val reviewviewModel = ReviewViewModel()
+                val orderModel = OrderModel()
+                val MenuSellerviewModel = MenuSellerViewModel(menuModel)
+                val OrderSellerviewModel = OrderSellerViewModel(orderModel)
+                val AvenueSellerviewModel = AvenueSellerViewModel(orderModel)
+
                 NavHost(
                     navController,
                     startDestination = "WelcomeActivity",
@@ -61,7 +81,7 @@ class MainActivity : ComponentActivity() {
                                         }
                                     }
                                     "RESTAURANT_OWNER" -> {
-                                        navController.navigate("HomeScreen_Seller") {
+                                        navController.navigate("store_home") {
                                             popUpTo("SignInScreen") { inclusive = true }
                                         }
                                     }
@@ -234,9 +254,6 @@ class MainActivity : ComponentActivity() {
                     composable("HomeScreen") {
                         HomeScreen(navController = navController)
                     }
-                    composable("HomeScreen_Seller") {
-                        HomeScreen_Seller(navController, viewModel = storeViewModel)
-                    }
                     composable("CartScreen") {
                         CartScreen(
                             cartItems = cartItems,
@@ -266,8 +283,48 @@ class MainActivity : ComponentActivity() {
                     composable("Favorite") {
                         Favorite(navController)
                     }
-                    composable("UserProfile") {
-                        UserProfile(navController, sharedPreferences)
+//                    composable("UserProfile") {
+//                        UserProfile(navController, TokenManager.getToken()?)
+//                    }
+                    composable("store_home") { StoreHomeScreen(navController,storeviewModel) }
+                    composable("customer_reviews") { ReviewScreen(navController,reviewviewModel) }
+                    composable("menu") { MenuSeller(navController,MenuSellerviewModel) }
+                    composable("orders") { OrderSellerScreen(navController,OrderSellerviewModel) }
+                    composable("revenue") { AvenueSellerScreen(navController,AvenueSellerviewModel) }
+                    composable(  "addDish") { AddDishScreen(navController,MenuSellerviewModel)}
+                    composable("editDish/{dishName}") { backStackEntry ->
+                        val dishName = backStackEntry.arguments?.getString("dishName") ?: ""
+                        val dish = MenuSellerviewModel.dishes.collectAsState().value.find { it.name == dishName }
+                        if (dish != null) {
+                            com.example.yummy.EditDishScreen(
+                                navController = navController,
+                                dish = dish,
+                                MenuSellerviewModel
+                            )
+                        }
+                    }
+                    composable("deleteDish/{dishName}") { backStackEntry ->
+                        val dishName = backStackEntry.arguments?.getString("dishName") ?: ""
+                        val dish = MenuSellerviewModel.dishes.collectAsState().value.find { it.name == dishName }
+                        if (dish != null) {
+                            DeleteDishScreen(
+                                navController = navController,
+                                dish = dish,
+                                viewModel = MenuSellerviewModel
+                            )
+                        }
+                    }
+                    composable("cancel_order/{orderId}") { backStackEntry ->
+                        val orderId = backStackEntry.arguments?.getString("orderId")?.toIntOrNull()
+                        if (orderId != null) {
+                            CancelOrderScreen(
+                                navController = navController,
+                                orderId = orderId,
+                                onCancelOrder = { id, reason ->
+                                    OrderSellerviewModel.rejectOrderWithReason(id, reason)
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -296,11 +353,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    val navController = rememberNavController()
-    YummyTheme {
-        HomeScreen(navController = navController)
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun HomeScreenPreview() {
+//    val navController = rememberNavController()
+//    YummyTheme {
+//        HomeScreen(navController = navController)
+//    }
+//}

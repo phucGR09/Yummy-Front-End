@@ -20,9 +20,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.util.Log
 import androidx.navigation.NavController
 import androidx.navigation.NavDeepLinkSaveStateControl
+import coil.compose.AsyncImage
+import com.example.yummy.api.MenuItemApi
+import com.example.yummy.response.MenuItemResponse
+import com.example.yummy.viewmodel.MenuItemViewModel
+import com.example.yummy.viewmodel.MenuItemViewModelFactory
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,6 +39,14 @@ fun HomeScreen(navController: NavController) {
     // Lấy SharedPreferences
     val sharedPreferences = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
 
+    val menuApi = MenuItemApi.create()
+    val menuItemViewModel = viewModel<MenuItemViewModel>(
+        factory = MenuItemViewModelFactory(menuApi)
+    )
+
+    // Observe menu items
+    val menuItems by menuItemViewModel.menuItems.collectAsState(initial = null)
+
     // Đọc giá trị auth_token và user_type
     val authToken = sharedPreferences.getString("auth_token", null)
     val userType = sharedPreferences.getString("user_type", null)
@@ -41,6 +55,10 @@ fun HomeScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         Log.d("HomeScreen", "Auth Token: $authToken")
         Log.d("HomeScreen", "User Type: $userType")
+    }
+    LaunchedEffect(Unit) {
+        // Gọi API lấy danh sách món ăn khi màn hình được hiển thị
+        menuItemViewModel.getAllMenuItems()
     }
     Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -187,29 +205,32 @@ fun HomeScreen(navController: NavController) {
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-
-            // LazyVerticalGrid for Suggested Foods
-            items(suggestedFoods.chunked(2)) { rowItems ->
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    rowItems.forEach { food ->
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(4.dp)
-                        ) {
-                            SuggestedFoodCard(food = food, navController = navController)
+            menuItems?.result?.let { menuItems ->
+                // Render menu items in two columns
+                items(menuItems.chunked(2)) { rowItems ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        rowItems.forEach { menuItem ->
+                            SuggestedFoodCard(
+                                menuItem = menuItem, // Truyền trực tiếp đối tượng MenuItemResponse
+                                navController = navController
+                            )
                         }
                     }
-
-                    // Nếu số lượng item lẻ, thêm một Box trống để căn chỉnh
-                    if (rowItems.size < 2) {
-                        Spacer(modifier = Modifier.weight(1f))
+                }
+            } ?: run {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
@@ -290,7 +311,7 @@ fun RestaurantCard(restaurant: Restaurant) {
 }
 @Composable
 fun SuggestedFoodCard(
-    food: SuggestedFood,
+    menuItem: MenuItemResponse,
     navController: NavController
 ) {
     Card(
@@ -298,24 +319,22 @@ fun SuggestedFoodCard(
             .fillMaxWidth()
             .padding(8.dp)
             .clickable {
-                // Khi nhấn vào card, điều hướng tới màn hình chi tiết món ăn
-                navController.navigate("foodDetail/${food.name}/${food.price}/${food.description}/${food.imageResId}")
+                // Điều hướng tới màn hình chi tiết món ăn
+                navController.navigate(
+                    "foodDetail/${menuItem.name}/${menuItem.price}/${menuItem.description}/${menuItem.imageUrl}"
+                )
             },
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-
         Column(
-            //horizontalAlignment = Alignment.CenterHorizontally,
-            //verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.padding(8.dp)
         ) {
-            Image(
-                painter = painterResource(id = food.imageResId),
-                contentDescription = food.name,
+            // Hiển thị hình ảnh món ăn
+            AsyncImage(
+                model = menuItem.imageUrl,
+                contentDescription = menuItem.name,
                 modifier = Modifier
-                    //.size(120.dp)
-                    //.aspectRatio(1f)
                     .fillMaxWidth()
                     .height(150.dp) // Chiều cao cố định cho ảnh
                     .clip(MaterialTheme.shapes.medium),
@@ -325,16 +344,16 @@ fun SuggestedFoodCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp),
-                contentAlignment = Alignment.Center // Căn giữa nội dung
+                contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = food.name,
+                        text = menuItem.name,
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
                     Text(
-                        text = "$${String.format(Locale.US, "%.2f", food.price)}",
+                        text = "$${menuItem.price.setScale(2).toPlainString()}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
