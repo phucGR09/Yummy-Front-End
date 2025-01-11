@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.OptIn
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -17,6 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.util.Log
+import androidx.media3.common.util.UnstableApi
 import com.example.yummy.api.AuthenticationApi
 import com.example.yummy.ui.theme.YummyTheme
 import com.example.yummy.viewmodel.AuthenticationViewModel
@@ -40,6 +43,7 @@ class SignInActivity : ComponentActivity() {
     }
 }
 
+@OptIn(UnstableApi::class)
 @Composable
 fun SignInScreen(
     onSignInSuccess: () -> Unit,
@@ -56,28 +60,26 @@ fun SignInScreen(
     var errorMessage by remember { mutableStateOf("") }
 
     // Lắng nghe kết quả login từ ViewModel
-    authenticationViewModel.loginResult.value?.let {
-        it.result?.let { loginResponse ->
-            // Lưu thông tin người dùng vào SharedPreferences
-            val sharedPreferences = context.getSharedPreferences("UserPrefs", MODE_PRIVATE)
-            val editor = sharedPreferences.edit()
-            editor.putString("userToken", loginResponse.token)
-            editor.putString("userId", loginResponse.user.id.toString())
-            editor.putString("userName", loginResponse.user.userName)
-            editor.putString("userEmail", loginResponse.user.email)
-            editor.putString("userFullName", loginResponse.user.fullName)
-            editor.putString("userPhone", loginResponse.user.phoneNumber)
-            editor.putString("userType", loginResponse.user.userType)
-            editor.apply()
+    val loginResult = authenticationViewModel.loginResult.collectAsState().value
+
+    loginResult?.let { response ->
+        response.result?.let { authenticateResponse ->
+
+            val token = authenticateResponse.token // Trích xuất token từ response
+
+            // Lưu token vào SharedPreferences
+            val sharedPreferences = context.getSharedPreferences("auth_prefs", MODE_PRIVATE)
+            sharedPreferences.edit().putString("auth_token", token).apply()
 
             // Chuyển đến trang Home sau khi đăng nhập thành công
+            Toast.makeText(context, "Sign-in successful!", Toast.LENGTH_SHORT).show()
             onSignInSuccess()
         }
     }
 
     // Hiển thị thông báo lỗi nếu có
-    LaunchedEffect(authenticationViewModel.loginResult.value) {
-        if (authenticationViewModel.loginResult.value == null) {
+    LaunchedEffect(loginResult) {
+        if (loginResult == null) {
             errorMessage = "Login failed. Please try again."
         }
     }
@@ -121,6 +123,8 @@ fun SignInScreen(
         Button(
             onClick = {
                 if (emailOrPhone.isNotEmpty() && password.isNotEmpty()) {
+                    Log.d("SignInScreen", "Email/Phone: $emailOrPhone")
+                    Log.d("SignInScreen", "Password: $password")
                     val request = AuthenticateRequest(emailOrPhone, password)
                     authenticationViewModel.loginUser(request)
                 } else {
@@ -139,3 +143,4 @@ fun SignInScreen(
         }
     }
 }
+

@@ -6,5 +6,5 @@ data class UserCreationRequest(
     val email: String,
     val fullName: String?,
     val phoneNumber: String?,
-    val userType: String
+    val userType: UserType
 )

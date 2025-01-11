@@ -9,7 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object RetrofitInstance {
 
     // Địa chỉ của API (thay đổi phù hợp với backend của bạn)
-    private const val BASE_URL = "http://localhost:8080/"
+    private const val BASE_URL = "http://192.168.229.110:8080/"
 
     // Tạo Retrofit instance
     private val retrofit by lazy {

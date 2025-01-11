@@ -12,6 +12,8 @@ import com.example.yummy.response.DeliveryDriverResponse
 import com.example.yummy.response.RestaurantOwnerResponse
 import com.example.yummy.response.UserResponse
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
@@ -20,8 +22,11 @@ import retrofit2.Response
 class AuthenticationViewModel(private val authenticationApi: AuthenticationApi) : ViewModel() {
 
     // LiveData để theo dõi kết quả của các API request
-    val registerResult = mutableStateOf<ApiResponse<UserResponse>?>(null)
-    val loginResult = mutableStateOf<ApiResponse<AuthenticateResponse>?>(null)
+    private val _registerResult = MutableStateFlow<ApiResponse<UserResponse>?>(null)
+    val registerResult: StateFlow<ApiResponse<UserResponse>?> = _registerResult
+
+    private val _loginResult = MutableStateFlow<ApiResponse<AuthenticateResponse>?>(null)
+    val loginResult: StateFlow<ApiResponse<AuthenticateResponse>?> = _loginResult
     val createCustomerResult = mutableStateOf<ApiResponse<CustomerResponse>?>(null)
     val createDriverResult = mutableStateOf<ApiResponse<DeliveryDriverResponse>?>(null)
     val createRestaurantOwnerResult = mutableStateOf<ApiResponse<RestaurantOwnerResponse>?>(null)
@@ -31,9 +36,9 @@ class AuthenticationViewModel(private val authenticationApi: AuthenticationApi) 
         authenticationApi.register(request).enqueue(object : Callback<ApiResponse<UserResponse>> {
             override fun onResponse(call: Call<ApiResponse<UserResponse>>, response: Response<ApiResponse<UserResponse>>) {
                 if (response.isSuccessful) {
-                    registerResult.value = response.body()
+                    _registerResult.value = response.body()
                 } else {
-                    Log.e("Authentication", "Register Failed: ${response.message()}")
+                    Log.e("Authentication", "Register Failed: ${response.code()}")
                 }
             }
 
@@ -48,7 +53,7 @@ class AuthenticationViewModel(private val authenticationApi: AuthenticationApi) 
         authenticationApi.login(request).enqueue(object : Callback<ApiResponse<AuthenticateResponse>> {
             override fun onResponse(call: Call<ApiResponse<AuthenticateResponse>>, response: Response<ApiResponse<AuthenticateResponse>>) {
                 if (response.isSuccessful) {
-                    loginResult.value = response.body()
+                    _loginResult.value = response.body()
                 } else {
                     Log.e("Authentication", "Login Failed: ${response.message()}")
                 }
