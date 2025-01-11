@@ -327,9 +327,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun generateOtp(): String {
-        return (1000..9999).random().toString()
-    }
 
     private fun saveUserDetails(
         context: Context,
