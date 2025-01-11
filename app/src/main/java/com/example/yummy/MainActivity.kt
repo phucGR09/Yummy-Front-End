@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -45,11 +46,13 @@ class MainActivity : ComponentActivity() {
             }
         }
         super.onCreate(savedInstanceState)
+
         setContent {
             YummyTheme(darkTheme = false) {
                 val navController = rememberNavController()
                 var cartItems by remember { mutableStateOf(emptyList<CartItem>()) }
-                val sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+                // here
+                //val sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE)
                 val userAddress = "41, Nguyễn Văn Cừ, P4, Q5, TPHCM"
                 val storeviewModel = StoreViewModel()
                 val reviewviewModel = ReviewViewModel()
@@ -57,6 +60,7 @@ class MainActivity : ComponentActivity() {
                 val MenuSellerviewModel = MenuSellerViewModel(menuModel)
                 val OrderSellerviewModel = OrderSellerViewModel(orderModel)
                 val AvenueSellerviewModel = AvenueSellerViewModel(orderModel)
+
                 NavHost(
                     navController,
                     startDestination = "WelcomeActivity",
@@ -230,9 +234,9 @@ class MainActivity : ComponentActivity() {
                     composable("Favorite") {
                         Favorite(navController)
                     }
-                    composable("UserProfile") {
-                        UserProfile(navController, sharedPreferences)
-                    }
+//                    composable("UserProfile") {
+//                        UserProfile(navController, TokenManager.getToken()?)
+//                    }
                     composable("store_home") { StoreHomeScreen(navController,storeviewModel) }
                     composable("customer_reviews") { ReviewScreen(navController,reviewviewModel) }
                     composable("menu") { MenuSeller(navController,MenuSellerviewModel) }
@@ -297,11 +301,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    val navController = rememberNavController()
-    YummyTheme {
-        HomeScreen(navController = navController)
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun HomeScreenPreview() {
+//    val navController = rememberNavController()
+//    YummyTheme {
+//        HomeScreen(navController = navController)
+//    }
+//}
