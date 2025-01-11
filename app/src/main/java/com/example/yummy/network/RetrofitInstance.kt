@@ -12,6 +12,7 @@ object RetrofitInstance {
 
     private const val BASE_URL = "http://192.168.229.110:8080/"
 
+    // Tạo Retrofit instance
     private val retrofit by lazy {
         // Tạo OkHttpClient với AuthInterceptor
         val okHttpClient = OkHttpClient.Builder()

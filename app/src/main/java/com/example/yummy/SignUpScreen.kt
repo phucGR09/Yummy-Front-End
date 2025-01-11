@@ -27,18 +27,20 @@ import com.example.yummy.api.AuthenticationApi
 import java.util.Locale
 import com.example.yummy.models.UserType
 enum class UserType {
-    CUSTOMER, RESTAURANT_OWNER, DELIVERY_DRIVER
+    CUSTOMER,
+    RESTAURANT_OWNER,
+    DELIVERY_DRIVER
 }
 
-// Extension function to map UserType to Vietnamese display names
 fun UserType.toDisplayName(): String {
     return when (this) {
         UserType.CUSTOMER -> "Người Mua hàng"
         UserType.RESTAURANT_OWNER -> "Người Bán Hàng"
         UserType.DELIVERY_DRIVER -> "Người Giao Hàng"
-        UserType.ADMIN -> TODO()
+        else -> throw IllegalArgumentException("Invalid user type")
     }
 }
+
 @OptIn(UnstableApi::class)
 
 
@@ -186,16 +188,17 @@ fun SignUpScreen(
                     else -> {
                         isLoading = true
                         val request = RegisterRequest(
-                            username = "phuc",
-                            password = "Phuc12345#",
-                            email = "phuc@gmail.com",
-                            fullName = "phanphuc",
-                            phone = "0123456789",
-                            userType = "CUSTOMER"// Lấy tên enum làm giá trị userType
+                            username = username,
+                            password = password,
+                            email = email,
+                            fullName = fullName,
+                            phone = phone,
+                            userType = selectedRole?.name ?: ""
                         )
                         // Log thông tin request
                         Log.d("SignUpScreen", "Register Request: $request")
                         authenticationViewModel.registerUser(request)
+
                     }
                 }
             },
@@ -221,7 +224,7 @@ fun RoleSelectionRadioButton(
     selectedRole: UserType?, // Kiểu UserType, có thể null
     onRoleSelected: (UserType) -> Unit // Hàm callback khi chọn role
 ) {
-    val roles = listOf(UserType.CUSTOMER, UserType.RESTAURANT_OWNER, UserType.DELIVERY_DRIVER, UserType.ADMIN)
+    val roles = listOf(UserType.CUSTOMER, UserType.RESTAURANT_OWNER, UserType.DELIVERY_DRIVER)
 
     Column {
         roles.forEach { role ->

@@ -4,7 +4,6 @@ enum class UserType {
     CUSTOMER,
     RESTAURANT_OWNER,
     DELIVERY_DRIVER,
-    ADMIN
 }
 data class RegisterRequest(
     val username: String,
