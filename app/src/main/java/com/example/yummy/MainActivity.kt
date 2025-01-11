@@ -108,56 +108,6 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable(
-                        "ProfileShippperScreen/{fullName}/{username}/{email}/{phoneNumber}/{cccd}/{license}/{avatarUrl}",
-                        arguments = listOf(
-                            navArgument("fullName") { type = NavType.StringType },
-                            navArgument("username") { type = NavType.StringType },
-                            navArgument("email") { type = NavType.StringType },
-                            navArgument("phoneNumber") { type = NavType.StringType },
-                            navArgument("cccd") { type = NavType.StringType },
-                            navArgument("license") { type = NavType.StringType },
-                            navArgument("avatarUrl") { type = NavType.StringType }
-                        )
-                    ) { backStackEntry ->
-                        val fullName = backStackEntry.arguments?.getString("fullName") ?: ""
-                        val username = backStackEntry.arguments?.getString("username") ?: ""
-                        val email = backStackEntry.arguments?.getString("email") ?: ""
-                        val phoneNumber = backStackEntry.arguments?.getString("phoneNumber") ?: ""
-                        val cccd = backStackEntry.arguments?.getString("cccd") ?: ""
-                        val license = backStackEntry.arguments?.getString("license") ?: ""
-                        val avatarUrl = backStackEntry.arguments?.getString("avatarUrl") ?: ""
-
-                        ProfileShipperScreen(
-                            fullName = fullName,
-                            username = username,
-                            email = email,
-                            phoneNumber = phoneNumber,
-                            cccd = cccd,
-                            license = license,
-                            avatarUrl = avatarUrl,
-                            onSave = { updatedFullName, updatedUsername, updatedEmail, updatedPhoneNumber, updatedCCCD, updatedLicense, updatedAvatarUrl ->
-                                // Save the updated details
-                                saveUserDetails(
-                                    context = this@MainActivity,
-                                    name = updatedFullName,
-                                    emailOrPhone = updatedEmail,
-                                    password = "", // Password handling not required here
-                                    role = UserType.DELIVERY_DRIVER
-                                )
-
-                                Toast.makeText(
-                                    this@MainActivity,
-                                    "Thông tin đã được cập nhật thành công!",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-
-                                // Navigate back to home screen or perform other actions
-                                navController.navigate("HomeScreen")
-                            }
-                        )
-                    }
-
-                    composable(
                         "ProfileBuyerScreen/{username}/{fullName}/{email}/{phoneNumber}/{address}",
                         arguments = listOf(
                             navArgument("username") { type = NavType.StringType },

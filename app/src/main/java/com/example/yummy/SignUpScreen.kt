@@ -188,16 +188,17 @@ fun SignUpScreen(
                     else -> {
                         isLoading = true
                         val request = RegisterRequest(
-                            username = "phuc",
-                            password = "Phuc12345#",
-                            email = "phuc@gmail.com",
-                            fullName = "phanphuc",
-                            phone = "0123456789",
-                            userType = "CUSTOMER"// Lấy tên enum làm giá trị userType
+                            username = username,
+                            password = password,
+                            email = email,
+                            fullName = fullName,
+                            phone = phone,
+                            userType = selectedRole?.name ?: ""
                         )
                         // Log thông tin request
                         Log.d("SignUpScreen", "Register Request: $request")
                         authenticationViewModel.registerUser(request)
+
                     }
                 }
             },
