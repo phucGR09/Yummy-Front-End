@@ -30,8 +30,20 @@ import retrofit2.Response
 
 
 
+
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        val menuModel = MenuModel()
+        // Sử dụng lifecycleScope để đảm bảo an toàn với vòng đời Activity
+        lifecycleScope.launch {
+            val success = menuModel.getDishes()
+            if (success) {
+                println("Danh sách món ăn được tải thành công khi khởi động ứng dụng.")
+            } else {
+                println("Không thể tải danh sách món ăn khi khởi động.")
+            }
+        }
         super.onCreate(savedInstanceState)
         setContent {
             YummyTheme(darkTheme = false) {
@@ -39,7 +51,12 @@ class MainActivity : ComponentActivity() {
                 var cartItems by remember { mutableStateOf(emptyList<CartItem>()) }
                 val sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE)
                 val userAddress = "41, Nguyễn Văn Cừ, P4, Q5, TPHCM"
-
+                val storeviewModel = StoreViewModel()
+                val reviewviewModel = ReviewViewModel()
+                val orderModel = OrderModel()
+                val MenuSellerviewModel = MenuSellerViewModel(menuModel)
+                val OrderSellerviewModel = OrderSellerViewModel(orderModel)
+                val AvenueSellerviewModel = AvenueSellerViewModel(orderModel)
                 NavHost(
                     navController,
                     startDestination = "WelcomeActivity",
@@ -60,7 +77,7 @@ class MainActivity : ComponentActivity() {
                                         }
                                     }
                                     "RESTAURANT_OWNER" -> {
-                                        navController.navigate("HomeScreen") {
+                                        navController.navigate("store_home") {
                                             popUpTo("SignInScreen") { inclusive = true }
                                         }
                                     }
@@ -264,6 +281,46 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("UserProfile") {
                         UserProfile(navController, sharedPreferences)
+                    }
+                    composable("store_home") { StoreHomeScreen(navController,storeviewModel) }
+                    composable("customer_reviews") { ReviewScreen(navController,reviewviewModel) }
+                    composable("menu") { MenuSeller(navController,MenuSellerviewModel) }
+                    composable("orders") { OrderSellerScreen(navController,OrderSellerviewModel) }
+                    composable("revenue") { AvenueSellerScreen(navController,AvenueSellerviewModel) }
+                    composable(  "addDish") { AddDishScreen(navController,MenuSellerviewModel)}
+                    composable("editDish/{dishName}") { backStackEntry ->
+                        val dishName = backStackEntry.arguments?.getString("dishName") ?: ""
+                        val dish = MenuSellerviewModel.dishes.collectAsState().value.find { it.name == dishName }
+                        if (dish != null) {
+                            com.example.yummy.EditDishScreen(
+                                navController = navController,
+                                dish = dish,
+                                MenuSellerviewModel
+                            )
+                        }
+                    }
+                    composable("deleteDish/{dishName}") { backStackEntry ->
+                        val dishName = backStackEntry.arguments?.getString("dishName") ?: ""
+                        val dish = MenuSellerviewModel.dishes.collectAsState().value.find { it.name == dishName }
+                        if (dish != null) {
+                            DeleteDishScreen(
+                                navController = navController,
+                                dish = dish,
+                                viewModel = MenuSellerviewModel
+                            )
+                        }
+                    }
+                    composable("cancel_order/{orderId}") { backStackEntry ->
+                        val orderId = backStackEntry.arguments?.getString("orderId")?.toIntOrNull()
+                        if (orderId != null) {
+                            CancelOrderScreen(
+                                navController = navController,
+                                orderId = orderId,
+                                onCancelOrder = { id, reason ->
+                                    OrderSellerviewModel.rejectOrderWithReason(id, reason)
+                                }
+                            )
+                        }
                     }
                 }
             }
