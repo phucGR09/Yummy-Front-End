@@ -29,11 +29,11 @@ import androidx.navigation.compose.rememberNavController
 fun PreviewStoreHomeScreen() {
     val navController = rememberNavController()
     val viewModel = StoreViewModel()
-    StoreHomeScreen(navController = navController,viewModel)
+    HomeScreen_Seller(navController = navController,viewModel)
 }
 
 @Composable
-fun StoreHomeScreen(navController: NavController, viewModel: StoreViewModel) {
+fun HomeScreen_Seller(navController: NavController, viewModel: StoreViewModel) {
     val storeInfo = viewModel.storeInfo
     val products by viewModel.products.collectAsState()
     val isProductListEmpty by viewModel.isProductListEmpty.collectAsState()

@@ -1,5 +1,6 @@
 package com.example.yummy // Đổi thành package của bạn
 
+import android.content.Context
 import androidx.compose.foundation.* // Đảm bảo các import cần thiết
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,8 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.util.Log
 import androidx.navigation.NavController
 import androidx.navigation.NavDeepLinkSaveStateControl
 import java.util.Locale
@@ -26,6 +29,19 @@ import java.util.Locale
 @Composable
 fun HomeScreen(navController: NavController) {
     var searchQuery by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    // Lấy SharedPreferences
+    val sharedPreferences = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+
+    // Đọc giá trị auth_token và user_type
+    val authToken = sharedPreferences.getString("auth_token", null)
+    val userType = sharedPreferences.getString("user_type", null)
+
+    // Log giá trị auth_token và user_type
+    LaunchedEffect(Unit) {
+        Log.d("HomeScreen", "Auth Token: $authToken")
+        Log.d("HomeScreen", "User Type: $userType")
+    }
     Scaffold(
             modifier = Modifier.fillMaxSize(),
             bottomBar = {

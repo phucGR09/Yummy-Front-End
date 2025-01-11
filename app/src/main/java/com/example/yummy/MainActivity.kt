@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -39,7 +40,7 @@ class MainActivity : ComponentActivity() {
                 var cartItems by remember { mutableStateOf(emptyList<CartItem>()) }
                 val sharedPreferences = getSharedPreferences("UserPrefs", MODE_PRIVATE)
                 val userAddress = "41, Nguyễn Văn Cừ, P4, Q5, TPHCM"
-
+                val storeViewModel: StoreViewModel = viewModel()
                 NavHost(
                     navController,
                     startDestination = "WelcomeActivity",
@@ -60,7 +61,7 @@ class MainActivity : ComponentActivity() {
                                         }
                                     }
                                     "RESTAURANT_OWNER" -> {
-                                        navController.navigate("HomeScreen") {
+                                        navController.navigate("HomeScreen_Seller") {
                                             popUpTo("SignInScreen") { inclusive = true }
                                         }
                                     }
@@ -232,6 +233,9 @@ class MainActivity : ComponentActivity() {
 
                     composable("HomeScreen") {
                         HomeScreen(navController = navController)
+                    }
+                    composable("HomeScreen_Seller") {
+                        HomeScreen_Seller(navController, viewModel = storeViewModel)
                     }
                     composable("CartScreen") {
                         CartScreen(
