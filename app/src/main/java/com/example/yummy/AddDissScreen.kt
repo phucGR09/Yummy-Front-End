@@ -66,8 +66,8 @@ fun AddDishScreen(
     ) { uri: Uri? ->
         uri?.let { selectedUri ->
             isUploading = true // Bắt đầu upload ảnh
-            viewModel.updateImage(Dish(0,1,name, price.toIntOrNull() ?: 0, description, null), selectedUri.toString()) { success ->
-                isUploading = false // Kết thúc upload
+            viewModel.updateImage(Dish(-1,SharedData.restaurantId,name, price.toIntOrNull() ?: 0, description, null), selectedUri.toString()) { success ->
+                isUploading = false // Kết thúc uploa
                 if (success) {
                     imagePath = selectedUri.toString() // Cập nhật ảnh hiển thị
                 } else {
@@ -196,8 +196,8 @@ fun AddDishScreen(
                 onClick = {
                     if (name.isNotEmpty() && price.isNotEmpty()) {
                         val newDish = Dish(
-                            itemId = 0,
-                            restaurantId =1,
+                            itemId = -1,
+                            restaurantId =SharedData.restaurantId,
                             name = name,
                             price = price.toIntOrNull() ?: 0,
                             description = description,

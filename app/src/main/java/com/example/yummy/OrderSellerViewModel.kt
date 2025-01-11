@@ -3,9 +3,9 @@ package com.example.yummy
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.StateFlow
 class OrderSellerViewModel(private val orderModel: OrderModel) : ViewModel() {
-    val delivering: StateFlow<List<Order>> = orderModel.delivering
-    val waitingConfirmation: StateFlow<List<Order>> = orderModel.waitingConfirmation
-    val confirmed: StateFlow<List<Order>> = orderModel.confirmed
+    val delivering: StateFlow<List<Order>> = orderModel.DELIVERING
+    val waitingConfirmation: StateFlow<List<Order>> = orderModel.WAITING_RESTAURANT_CONFIRMATION
+    val confirmed: StateFlow<List<Order>> = orderModel.RESTAURANT_CONFIRMED
 
     // Hàm gọi danh sách đơn hàng từ Model
     fun fetchOrders(restaurantId: Int) {

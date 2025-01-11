@@ -38,8 +38,8 @@ fun PreviewEditDishScreen() {
 
     // Món ăn giả lập để chỉnh sửa
     val dish = Dish(
-        itemId = 1,
-        restaurantId = 0,
+        itemId = -1,
+        restaurantId = SharedData.restaurantId,
         name = "Bánh tráng trộn",
         price = 25000,
         description = "Món ăn vặt nổi tiếng",
@@ -131,7 +131,7 @@ fun EditDishScreen(
                             .data(dish.imagePath)
                             .crossfade(true)
                             .size(140) // Giới hạn kích thước tải về
-                            .error(R.drawable.banh_trang_tron) // Ảnh mặc định nếu tải thất bại
+                            .error(R.drawable.default_food_icon) // Ảnh mặc định nếu tải thất bại
                             .build(),
                         contentDescription = dish.name,
                         modifier = Modifier
@@ -142,14 +142,23 @@ fun EditDishScreen(
                 } else {
                     val localImageName = removeDiacritics(dish.name.lowercase().replace(" ", "_"))
                     val localImageRes = getResourceId(localImageName)
-                    Image(
-                        painter = painterResource(id = localImageRes),
-                        contentDescription = dish.name,
-                        modifier = Modifier
-                            .size(140.dp)
-                            .clip(RoundedCornerShape(8.dp)),
-                        contentScale = ContentScale.Fit
-                    )
+                    if (localImageRes != 0) {
+                        Image(
+                            painter = painterResource(id = localImageRes),
+                            contentDescription = dish.name,
+                            modifier = Modifier
+                                .size(80.dp)
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Fit
+                        )
+                    }else{
+                        Image(
+                            painter = painterResource(id = R.drawable.default_food_icon),
+                            contentDescription = dish.name,
+                            modifier = Modifier.size(80.dp).clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp)) // Tạo khoảng cách giữa ảnh và nút
@@ -208,20 +217,26 @@ fun EditDishScreen(
             // Nút Lưu
             Button(
                 onClick = {
-                    val updatedDish = dish.copy(
-                        name = name,
-                        price = price.toIntOrNull() ?: dish.price,
-                        description = description,
-                        imagePath = imagePath
-                    )
-                    viewModel.updateDish(updatedDish){ success ->
-                        if (success) {
-                            println("Thay đổi món ăn thành công")
-                        } else {
-                            println("Thay đổi món ăn thất bại")
+                    val updatedPrice = price.toIntOrNull()
+                    if (updatedPrice != null) {
+                        val updatedDish = dish.copy(
+                            name = name,
+                            price = updatedPrice,
+                            description = description,
+                            imagePath = imagePath
+                        )
+                        viewModel.updateDish(updatedDish) { success ->
+                            if (success) {
+                                println("Thay đổi món ăn thành công")
+
+                            } else {
+                                println("Thay đổi món ăn thất bại")
+                            }
                         }
+                        navController.popBackStack()
+                    } else {
+                        Toast.makeText(context, "Giá không hợp lệ", Toast.LENGTH_SHORT).show()
                     }
-                    navController.popBackStack()
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
                 modifier = Modifier.weight(1f)

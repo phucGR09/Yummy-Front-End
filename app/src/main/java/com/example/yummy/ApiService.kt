@@ -10,6 +10,8 @@ import retrofit2.http.GET
 import retrofit2.http.PATCH
 import java.time.LocalDateTime
 import retrofit2.Response
+import retrofit2.http.Query
+import java.time.LocalTime
 
 
 data class CreateMenuItemRequest(
@@ -61,7 +63,7 @@ data class RestaurantDetails(
     val id: Int,
     val name: String,
     val address: String,
-    val openingHours: LocalDateTime,
+    val openingHours: String,
     val owner: OwnerDetails
 )
 
@@ -84,17 +86,17 @@ data class UserDetails(
 
 interface ApiService {
     @PATCH("admin/menu-items/update")
-    suspend fun updateMenuItem(@Body request: UpdateMenuItemRequest): UpdateMenuItemResponse
+    suspend fun updateMenuItem(@Body request: UpdateMenuItemRequest):  Response<UpdateMenuItemResponse>
 
 
-    @DELETE("admin/menu-items/delete/{id}")
-    suspend fun deleteDish(@Path("id") id: Int): Response<Unit>
+    @DELETE("admin/menu-items/delete/id")
+    suspend fun deleteDish(@Query("id") id: Int): Response<Unit>
 
     @GET("admin/menu-items")
-    fun getMenu(): MenuItemsResponse
+    suspend fun getMenu(): Response<MenuItemsResponse>
 
 
     @POST("admin/menu-items/create")
-    fun createMenuItem(@Body request: CreateMenuItemRequest): CreateMenuItemResponse
+    suspend fun createMenuItem(@Body request: CreateMenuItemRequest):  Response<CreateMenuItemResponse>
 
 }

@@ -122,7 +122,7 @@ fun DishItem(dish: Dish, onEditClick: () -> Unit, onDeleteClick: () -> Unit) {
                         .data(dish.imagePath)
                         .crossfade(true)
                         .size(80) // Giới hạn kích thước tải về
-                        .error(R.drawable.banh_trang_tron) // Ảnh mặc định nếu tải thất bại
+                        .error(R.drawable.default_food_icon) // Ảnh mặc định nếu tải thất bại
                         .build(),
                     contentDescription = dish.name,
                     modifier = Modifier
@@ -133,14 +133,23 @@ fun DishItem(dish: Dish, onEditClick: () -> Unit, onDeleteClick: () -> Unit) {
             } else {
                 val localImageName = removeDiacritics(dish.name.lowercase().replace(" ", "_"))
                 val localImageRes = getResourceId(localImageName)
-                Image(
-                    painter = painterResource(id = localImageRes),
-                    contentDescription = dish.name,
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Fit
-                )
+                if (localImageRes != 0) {
+                    Image(
+                        painter = painterResource(id = localImageRes),
+                        contentDescription = dish.name,
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                        contentScale = ContentScale.Fit
+                    )
+                }else{
+                    Image(
+                        painter = painterResource(id = R.drawable.default_food_icon),
+                        contentDescription = dish.name,
+                        modifier = Modifier.size(80.dp).clip(RoundedCornerShape(8.dp)),
+                        contentScale = ContentScale.Fit
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.width(16.dp))
