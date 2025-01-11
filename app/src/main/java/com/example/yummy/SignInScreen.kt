@@ -70,9 +70,12 @@ fun SignInScreen(
 
             val token = authenticateResponse.token // Trích xuất token từ response
             val userType = authenticateResponse.userType // Lấy userType từ response
+
             // Lưu token vào SharedPreferences
-            val sharedPreferences = context.getSharedPreferences("auth_prefs", MODE_PRIVATE)
-            sharedPreferences.edit().putString("auth_token", token).putString("user_type", userType).apply()
+            AuthManager.saveAuthData(context, token, userType)
+
+            //val sharedPreferences = context.getSharedPreferences("auth_prefs", MODE_PRIVATE)
+            //sharedPreferences.edit().putString("auth_token", token).putString("user_type", userType).apply()
 
             // Chuyển đến trang Home sau khi đăng nhập thành công
             Toast.makeText(context, "Sign-in successful!", Toast.LENGTH_SHORT).show()

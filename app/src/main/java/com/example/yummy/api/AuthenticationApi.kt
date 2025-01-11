@@ -30,7 +30,7 @@ interface AuthenticationApi {
     @POST("api/v1/auth/login")
     fun login(@Body request: AuthenticateRequest): Call<ApiResponse<AuthenticateResponse>>
     companion object {
-        private const val BASE_URL = "http://192.168.1.22:8080/" // Replace with your API base URL
+        private const val BASE_URL = "http://192.168.229.110:8080/" // Replace with your API base URL
 
         fun create(): AuthenticationApi {
             val client = OkHttpClient.Builder().build()
