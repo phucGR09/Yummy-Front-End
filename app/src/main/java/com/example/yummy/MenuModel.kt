@@ -27,6 +27,56 @@ class MenuModel {
     private val _dishes = MutableStateFlow<List<Dish>>(emptyList())
     val dishes: StateFlow<List<Dish>> = _dishes
 
+    private val _restaurants = MutableStateFlow<List<RestaurantDetails>>(emptyList())
+    val restaurants: StateFlow<List<RestaurantDetails>> = _restaurants
+
+    suspend fun fetchRestaurants(username: String): List<RestaurantDetails>? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getRestaurantsByUsername(username)
+                if (response.isSuccessful) {
+                    val restaurants = response.body()?.result.orEmpty()
+                    _restaurants.value = restaurants
+                    return@withContext restaurants
+                } else {
+                    println("Error fetching restaurants: ${response.errorBody()?.string()}")
+                    null
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
+    }
+
+    suspend fun getDishesByRestaurantId(restaurantId: Int): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getMenuItemByRestaurantId(restaurantId)
+                if (response.isSuccessful) {
+                    val dishesFromServer = response.body()?.result?.map { menuItem ->
+                        Dish(
+                            itemId = menuItem.id,
+                            restaurantId = menuItem.restaurant.id,
+                            name = menuItem.name,
+                            price = menuItem.price.toInt(),
+                            description = menuItem.description,
+                            imagePath = menuItem.imageUrl
+                        )
+                    }.orEmpty()
+                    _dishes.value = dishesFromServer
+                    true
+                } else {
+                    println("Error fetching dishes: ${response.errorBody()?.string()}")
+                    false
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                false
+            }
+        }
+    }
+
     // Thêm món ăn mới
     suspend fun addDish(newDish: Dish): Boolean {
         return withContext(Dispatchers.IO) {

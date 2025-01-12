@@ -220,20 +220,31 @@ fun EditDishScreen(
                     val updatedPrice = price.toIntOrNull()
                     if (updatedPrice != null) {
                         val updatedDish = dish.copy(
-                            name = name,
+                            name = name.trim(),
                             price = updatedPrice,
-                            description = description,
+                            description = description.trim(),
                             imagePath = imagePath
                         )
-                        viewModel.updateDish(updatedDish) { success ->
-                            if (success) {
-                                println("Thay đổi món ăn thành công")
 
-                            } else {
-                                println("Thay đổi món ăn thất bại")
-                            }
+                        // Kiểm tra xem tên món ăn có trùng không (ngoại trừ món hiện tại)
+                        val isDuplicateName = viewModel.dishes.value.any { existingDish ->
+                            existingDish.name.equals(updatedDish.name, ignoreCase = true) &&
+                                    existingDish.itemId != updatedDish.itemId
                         }
-                        navController.popBackStack()
+
+                        if (isDuplicateName) {
+                            Toast.makeText(context, "Tên món ăn đã tồn tại!", Toast.LENGTH_SHORT).show()
+                        } else {
+                            // Gửi yêu cầu cập nhật món ăn
+                            viewModel.updateDish(updatedDish) { success ->
+                                if (success) {
+                                    Toast.makeText(context, "Cập nhật món ăn thành công!", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "Cập nhật món ăn thất bại!", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                            navController.popBackStack()
+                        }
                     } else {
                         Toast.makeText(context, "Giá không hợp lệ", Toast.LENGTH_SHORT).show()
                     }

@@ -37,14 +37,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val menuModel = MenuModel()
         // Sử dụng lifecycleScope để đảm bảo an toàn với vòng đời Activity
-        lifecycleScope.launch {
-            val success = menuModel.getDishes()
-            if (success) {
-                println("Danh sách món ăn được tải thành công khi khởi động ứng dụng.")
-            } else {
-                println("Không thể tải danh sách món ăn khi khởi động.")
-            }
-        }
         super.onCreate(savedInstanceState)
 
         setContent {
@@ -72,7 +64,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable("SignInScreen") {
-                        SignInScreen(
+                        SignInScreen(menuModel,
                             onSignInSuccess = { userType ->
                                 when (userType) {
                                     "CUSTOMER" -> {

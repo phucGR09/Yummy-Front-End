@@ -35,6 +35,9 @@ class AuthenticationViewModel(private val authenticationApi: AuthenticationApi) 
         _registerResult.value = null
     }
 
+    fun resetLoginResult() {
+        _loginResult.value = null
+    }
 
     fun registerUser(
         request: RegisterRequest,
