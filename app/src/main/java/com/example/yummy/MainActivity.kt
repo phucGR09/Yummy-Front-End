@@ -17,7 +17,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.yummy.api.MenuItemApi
 import com.example.yummy.ui.theme.YummyTheme
+import com.example.yummy.viewmodel.MenuItemViewModel
+import com.example.yummy.viewmodel.MenuItemViewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -27,7 +30,6 @@ import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-
 
 
 
@@ -202,7 +204,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("HomeScreen") {
-                        HomeScreen(navController = navController)
+                        HomeScreen(navController = navController, menuModel = menuModel)
                     }
                     composable("CartScreen") {
                         CartScreen(
