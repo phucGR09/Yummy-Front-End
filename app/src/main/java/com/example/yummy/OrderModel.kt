@@ -1,20 +1,25 @@
 package com.example.yummy
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 
 // Data class cho Order
 data class Order(
-    val orderId: Int,
-    val restaurantId: Int,
-    val driverId: Int,
-    val customerId: Int,
-    val orderTime: LocalDateTime,
-    val totalPrice: Double,
-    var orderStatus: OrderStatus
+    val orderId: Int,               // ID của đơn hàng
+    val restaurantId: Int,          // ID của nhà hàng
+    val driverId: Int,              // ID của tài xế (có thể -1 nếu chưa có tài xế)
+    val customerId: Int,            // ID của khách hàng
+    val driverUsername: String?,    // Tên người dùng của tài xế (nullable nếu chưa có tài xế)
+    val customerUsername: String,   // Tên người dùng của khách hàng (bắt buộc)
+    val orderTime: LocalDateTime,   // Thời gian đặt hàng
+    val totalPrice: Double,         // Tổng giá trị đơn hàng
+    var orderStatus: OrderStatus    // Trạng thái đơn hàng
 )
+
 
 // Enum class cho trạng thái đơn hàng
 enum class OrderStatus {
@@ -35,6 +40,9 @@ class OrderModel {
     private val _DELIVERED = MutableStateFlow<List<Order>>(emptyList())
     private val _CANCELLED = MutableStateFlow<List<Order>>(emptyList())
 
+
+    private val apiService = ApiClient.instance.create(ApiService::class.java)
+
     val WAITING_RESTAURANT_CONFIRMATION: StateFlow<List<Order>> = _WAITING_RESTAURANT_CONFIRMATION
     val RESTAURANT_CONFIRMED: StateFlow<List<Order>> = _RESTAURANT_CONFIRMED
     val WAITING_DELIVERY: StateFlow<List<Order>> = _WAITING_DELIVERY
@@ -42,18 +50,96 @@ class OrderModel {
     val DELIVERED: StateFlow<List<Order>> = _DELIVERED
     val cancelled: StateFlow<List<Order>> = _CANCELLED
 
+    private val _orders = MutableStateFlow<List<OrderDetails>>(emptyList())
+    val orders: StateFlow<List<OrderDetails>> = _orders
+
+    suspend fun fetchAndCategorizeOrders(): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                // Lấy restaurantId từ SharedData hoặc ApiClient
+                val restaurantId = SharedData.restaurantId.takeIf { it > 0 } ?: ApiClient.getRestaurantId()
+
+                // Gọi API lấy danh sách đơn hàng từ server
+                val response = apiService.getOrdersByRestaurantId(restaurantId)
+                if (response.isSuccessful) {
+                    val ordersFromServer = response.body()?.result.orEmpty()
+
+                    // Chuyển đổi và phân loại đơn hàng
+                    val convertedOrders = ordersFromServer.map { orderDetails ->
+                        Order(
+                            orderId = orderDetails.id,
+                            restaurantId = orderDetails.restaurant.id,
+                            driverId = orderDetails.driver?.id ?: -1,
+                            customerId = orderDetails.customer.id,
+                            driverUsername = orderDetails.driver?.user?.username, // Lấy thông tin tài xế nếu có
+                            customerUsername = orderDetails.customer.user.username, // Tên người dùng của khách hàng
+                            orderTime = orderDetails.orderTime,
+                            totalPrice = orderDetails.totalPrice,
+                            orderStatus = when (orderDetails.status) {
+                                "WAITING_RESTAURANT_CONFIRMATION" -> OrderStatus.WAITING_RESTAURANT_CONFIRMATION
+                                "RESTAURANT_CONFIRMED" -> OrderStatus.RESTAURANT_CONFIRMED
+                                "WAITING_DELIVERY" -> OrderStatus.WAITING_DELIVERY
+                                "DELIVERING" -> OrderStatus.DELIVERING
+                                "DELIVERED" -> OrderStatus.DELIVERED
+                                "CANCELLED" -> OrderStatus.CANCELLED
+                                else -> throw IllegalArgumentException("Unknown status: ${orderDetails.status}")
+                            }
+                        )
+                    }
+
+
+                    // Phân loại đơn hàng theo trạng thái
+                    updateOrders(convertedOrders)
+
+                    println("Lấy và phân loại đơn hàng thành công: ${convertedOrders.size} đơn hàng")
+                    return@withContext true
+                } else {
+                    println("Lỗi khi lấy đơn hàng: ${response.errorBody()?.string()}")
+                    return@withContext false
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return@withContext false
+            }
+        }
+    }
+
+    suspend fun updateOrderStatus(order: Order, newStatus: OrderStatus): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = OrderUpdateRequest(
+                    id = order.orderId,
+                    restaurantId = order.restaurantId,
+                    driverUsername = order.driverUsername,
+                    customerUsername = order.customerUsername,
+                    orderTime = order.orderTime.toString(),
+                    totalPrice = order.totalPrice,
+                    status = newStatus.name
+                )
+
+                val response = apiService.updateOrder(request)
+                if (response.isSuccessful) {
+                    val updatedOrder = response.body()?.result
+                    println("Cập nhật trạng thái đơn hàng thành công: ${updatedOrder?.id} -> ${updatedOrder?.status}")
+                    // Có thể thêm logic cập nhật trạng thái nội bộ nếu cần
+                    true
+                } else {
+                    println("Lỗi khi cập nhật trạng thái đơn hàng: ${response.errorBody()?.string()}")
+                    false
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                false
+            }
+        }
+    }
+
+
+
+
     // Hàm lấy danh sách đơn hàng từ server
     fun getOrdersList(restaurantId: Int) {
-        val serverData = listOf(
-            Order(1, restaurantId, 101, 201, LocalDateTime.now().minusHours(3), 50000.0, OrderStatus.RESTAURANT_CONFIRMED),
-            Order(2, restaurantId, 102, 202, LocalDateTime.now().minusHours(1), 30000.0, OrderStatus.DELIVERING),
-            Order(3, restaurantId, 103, 203, LocalDateTime.now().minusDays(1), 40000.0, OrderStatus.DELIVERED),
-            Order(4, restaurantId, 104, 204, LocalDateTime.now().minusHours(2), 20000.0, OrderStatus.CANCELLED),
-            Order(5, restaurantId, 105, 205, LocalDateTime.now(), 45000.0, OrderStatus.RESTAURANT_CONFIRMED),
-            Order(6, restaurantId, 105, 205, LocalDateTime.now(), 45000.0, OrderStatus.WAITING_RESTAURANT_CONFIRMATION),
-            Order(7, restaurantId, 105, 205, LocalDateTime.now(), 45000.0, OrderStatus.WAITING_RESTAURANT_CONFIRMATION)
-        )
-        updateOrders(serverData)
+
     }
 
     // Hàm cập nhật các danh sách theo trạng thái

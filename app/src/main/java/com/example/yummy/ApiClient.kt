@@ -12,6 +12,9 @@ import java.lang.reflect.Type
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
+import java.time.LocalDateTime
+
+
 class LocalTimeAdapter : JsonDeserializer<LocalTime>, JsonSerializer<LocalTime> {
     private val formatter = DateTimeFormatter.ofPattern("HH:mm:ss")
 
@@ -24,6 +27,18 @@ class LocalTimeAdapter : JsonDeserializer<LocalTime>, JsonSerializer<LocalTime> 
     }
 }
 
+class LocalDateTimeAdapter : JsonDeserializer<LocalDateTime>, JsonSerializer<LocalDateTime> {
+    private val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+
+    override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): LocalDateTime {
+        return LocalDateTime.parse(json.asString, formatter)
+    }
+
+    override fun serialize(src: LocalDateTime, typeOfSrc: Type, context: JsonSerializationContext): JsonElement {
+        return JsonPrimitive(src.format(formatter))
+    }
+}
+
 object ApiClient {
     private const val BASE_URL = "http://192.168.229.110:8080/api/v1/"  // Thay bằng địa chỉ IP backend
 
@@ -31,7 +46,7 @@ object ApiClient {
         level = HttpLoggingInterceptor.Level.BODY
     }
 
-    private var authToken = "eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJZdW1teS1iYWNrZW5kLXRlYW0iLCJzdWIiOiJhZG1pbiIsImV4cCI6MTczNjYxMDgwNiwiaWF0IjoxNzM2NTI0NDA2LCJzY29wZSI6IkFETUlOIn0.7v5IMTvMWx1_MRtf9YJsaA-yP89JWpTLVPWrN5VYqj9xKyN_33AykUQSuKucpJAKHMJEiCco9ImZBDpd59Mw2w"
+    private var authToken = "eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJZdW1teS1iYWNrZW5kLXRlYW0iLCJzdWIiOiJvd25lcjEiLCJleHAiOjE3MzY3MDQ4NjYsImlhdCI6MTczNjYxODQ2Niwic2NvcGUiOiJSRVNUQVVSQU5UX09XTkVSIn0.gUgqm4S8mbwNLGrOsC1EEk2fQdW6lN-KP7IwsBWL33g_CVlFg32WVRbEHVBs_ZnBE3xmuvBxG2okcIB7UhcftA"
     private var restaurantId = 1
     fun setAuthToken(token: String) {
         authToken = token
@@ -39,6 +54,10 @@ object ApiClient {
 
     fun setRestaurantId(id: Int){
         restaurantId = id
+    }
+
+    fun getRestaurantId(): Int{
+        return restaurantId
     }
 
     private val authInterceptor = Interceptor { chain ->
@@ -60,6 +79,7 @@ object ApiClient {
 
     val gson: Gson = GsonBuilder()
         .registerTypeAdapter(LocalTime::class.java, LocalTimeAdapter())
+        .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeAdapter())
         .create()
 
     val instance: Retrofit by lazy {
