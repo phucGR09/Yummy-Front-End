@@ -29,26 +29,27 @@ import com.example.yummy.viewmodel.AuthenticationViewModel
 import com.example.yummy.models.AuthenticateRequest
 import com.example.yummy.viewmodel.AuthenticationViewModelFactory
 
-class SignInActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            YummyTheme {
-                SignInScreen(
-                    onSignInSuccess = {
-                        Toast.makeText(this, "Sign-in successful!", Toast.LENGTH_SHORT).show()
-                        finish() // Navigate back or go to the home screen
-                    },
-                    onSignUpClick = { finish() } // Navigate to the previous screen
-                )
-            }
-        }
-    }
-}
+//class SignInActivity : ComponentActivity() {
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//        setContent {
+//            YummyTheme {
+//                SignInScreen(
+//                    onSignInSuccess = {
+//                        Toast.makeText(this, "Sign-in successful!", Toast.LENGTH_SHORT).show()
+//                        finish() // Navigate back or go to the home screen
+//                    },
+//                    onSignUpClick = { finish() } // Navigate to the previous screen
+//                )
+//            }
+//        }
+//    }
+//}
 
 @OptIn(UnstableApi::class)
 @Composable
 fun SignInScreen(
+    menuModel: MenuModel,
     onSignInSuccess: (String) -> Unit,
     onSignUpClick: () -> Unit
 ) {
@@ -65,21 +66,44 @@ fun SignInScreen(
     // Lắng nghe kết quả login từ ViewModel
     val loginResult = authenticationViewModel.loginResult.collectAsState().value
 
-    loginResult?.let { response ->
-        response.result?.let { authenticateResponse ->
+    LaunchedEffect(loginResult) {
+        loginResult?.let { response ->
+            response.result?.let { authenticateResponse ->
+                val token = authenticateResponse.token
+                val userType = authenticateResponse.userType
 
-            val token = authenticateResponse.token // Trích xuất token từ response
-            val userType = authenticateResponse.userType // Lấy userType từ response
+                // Lưu thông tin đăng nhập
+                ApiClient.setAuthToken(token)
+                AuthManager.saveAuthData(context, token, userType)
 
-            // Lưu token vào SharedPreferences
-            AuthManager.saveAuthData(context, token, userType)
+                if (userType == "RESTAURANT_OWNER") {
+                    // Sử dụng giá trị emailOrPhone làm username
+                    val username = emailOrPhone
 
-            //val sharedPreferences = context.getSharedPreferences("auth_prefs", MODE_PRIVATE)
-            //sharedPreferences.edit().putString("auth_token", token).putString("user_type", userType).apply()
+                    // Gọi API để lấy danh sách nhà hàng
+                    val restaurants = menuModel.fetchRestaurants(username)
+                    if (restaurants != null && restaurants.isNotEmpty()) {
+                        val firstRestaurantId = restaurants[0].id
 
-            // Chuyển đến trang Home sau khi đăng nhập thành công
-            Toast.makeText(context, "Sign-in successful!", Toast.LENGTH_SHORT).show()
-            onSignInSuccess(userType)
+                        // Gán restaurantId mặc định
+                        ApiClient.setRestaurantId(firstRestaurantId)
+                        SharedData.restaurantId = firstRestaurantId
+
+                        // Gọi hàm tải danh sách món ăn
+                        menuModel.getDishesByRestaurantId(firstRestaurantId)
+                    } else {
+                        errorMessage = "No restaurants found for user."
+                        return@LaunchedEffect
+                    }
+                }
+
+                // Đăng nhập thành công
+                Toast.makeText(context, "Sign-in successful!", Toast.LENGTH_SHORT).show()
+                onSignInSuccess(userType)
+
+                // Đặt lại trạng thái loginResult để tránh lặp
+                authenticationViewModel.resetLoginResult()
+            }
         }
     }
 

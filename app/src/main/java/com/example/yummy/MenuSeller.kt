@@ -116,21 +116,21 @@
                 modifier = Modifier.fillMaxWidth()
             ) {
                 // Hiển thị ảnh món ăn
-                if (!dish.imagePath.isNullOrEmpty()) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(dish.imagePath)
-                            .crossfade(true)
-                            .size(80) // Giới hạn kích thước tải về
-                            .error(R.drawable.default_food_icon) // Ảnh mặc định nếu tải thất bại
-                            .build(),
-                        contentDescription = dish.name,
-                        modifier = Modifier
-                            .size(80.dp)
-                            .clip(RoundedCornerShape(8.dp)),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
+//                if (!dish.imagePath.isNullOrEmpty()) {
+//                    AsyncImage(
+//                        model = ImageRequest.Builder(LocalContext.current)
+//                            .data(dish.imagePath)
+//                            .crossfade(true)
+//                            .size(80) // Giới hạn kích thước tải về
+//                            .error(R.drawable.default_food_icon) // Ảnh mặc định nếu tải thất bại
+//                            .build(),
+//                        contentDescription = dish.name,
+//                        modifier = Modifier
+//                            .size(80.dp)
+//                            .clip(RoundedCornerShape(8.dp)),
+//                        contentScale = ContentScale.Crop
+//                    )
+//                } else {}
                     val localImageName = removeDiacritics(dish.name.lowercase().replace(" ", "_"))
                     val localImageRes = getResourceId(localImageName)
                     if (localImageRes != 0) {
@@ -150,7 +150,7 @@
                             contentScale = ContentScale.Fit
                         )
                     }
-                }
+
 
                 Spacer(modifier = Modifier.width(16.dp))
 

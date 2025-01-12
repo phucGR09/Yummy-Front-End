@@ -39,14 +39,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val menuModel = MenuModel()
         // Sử dụng lifecycleScope để đảm bảo an toàn với vòng đời Activity
-        lifecycleScope.launch {
-            val success = menuModel.getDishes()
-            if (success) {
-                println("Danh sách món ăn được tải thành công khi khởi động ứng dụng.")
-            } else {
-                println("Không thể tải danh sách món ăn khi khởi động.")
-            }
-        }
         super.onCreate(savedInstanceState)
 
         setContent {
@@ -74,7 +66,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable("SignInScreen") {
-                        SignInScreen(
+                        SignInScreen(menuModel,
                             onSignInSuccess = { userType ->
                                 when (userType) {
                                     "CUSTOMER" -> {
@@ -105,6 +97,7 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("SignUpScreen"){
                         SignUpScreen(
+                            navController,
                             onSignUpSuccess = {
                                 navController.navigate("SignInScreen")
                             },
@@ -154,7 +147,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable(
-                        "ProfileSellerScreen/{username}/{fullName}/{address}/{openingHours}/{taxCode}/{email}/{phoneNumber}",
+                        "ProfileSellerScreen/{username}/{fullName}/{address}/{openingHours}/{taxCode}/{email}/{phoneNumber}/{shopName}",
                         arguments = listOf(
                             navArgument("username") { type = NavType.StringType },
                             navArgument("fullName") { type = NavType.StringType },
@@ -162,7 +155,8 @@ class MainActivity : ComponentActivity() {
                             navArgument("openingHours") { type = NavType.StringType },
                             navArgument("taxCode") { type = NavType.StringType },
                             navArgument("email") { type = NavType.StringType },
-                            navArgument("phoneNumber") { type = NavType.StringType }
+                            navArgument("phoneNumber") { type = NavType.StringType },
+                            navArgument("shopName") { type = NavType.StringType } // Thêm tham số shopName
                         )
                     ) { backStackEntry ->
                         val username = backStackEntry.arguments?.getString("username") ?: ""
@@ -172,6 +166,7 @@ class MainActivity : ComponentActivity() {
                         val taxCode = backStackEntry.arguments?.getString("taxCode") ?: ""
                         val email = backStackEntry.arguments?.getString("email") ?: ""
                         val phoneNumber = backStackEntry.arguments?.getString("phoneNumber") ?: ""
+                        val shopName = backStackEntry.arguments?.getString("shopName") ?: "" // Lấy shopName từ arguments
 
                         ProfileSellerScreen(
                             username = username,
@@ -181,7 +176,8 @@ class MainActivity : ComponentActivity() {
                             taxCode = taxCode,
                             email = email,
                             phoneNumber = phoneNumber,
-                            onSave = { updatedFullName, updatedAddress, updatedOpeningHours, updatedTaxCode, updatedEmail, updatedPhoneNumber ->
+                            shopName = shopName, // Truyền shopName vào
+                            onSave = { updatedFullName, updatedAddress, updatedOpeningHours, updatedTaxCode, updatedEmail, updatedPhoneNumber, updatedShopName ->
                                 // Save the updated details
                                 saveUserDetails(
                                     context = this@MainActivity,
