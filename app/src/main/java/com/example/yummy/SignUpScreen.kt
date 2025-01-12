@@ -212,14 +212,14 @@ fun SignUpScreen(
                                         navController.navigate(route)
                                     }
                                     UserType.RESTAURANT_OWNER -> {
-                                        val address = "default_address" // Giá trị mặc định
-                                        val openingHours = "18:00:00"
-                                        val taxCode = "default_tax_code"
-                                        val route = "ProfileSellerScreen/$username/$fullName/$address/$openingHours/$taxCode/$email/$phone/"
-                                        navController.navigate(
-                                            "ProfileSellerScreen/$username/$fullName/$address/$openingHours/$taxCode/$email/$phone"
-                                        )
+                                        val address = "" // Giá trị mặc định
+                                        val openingHours = ""
+                                        val taxCode = ""
+                                        val shopName = "" // Giá trị mặc định cho shopName
+                                        val route = "ProfileSellerScreen/$username/$fullName/$address/$openingHours/$taxCode/$email/$phone/$shopName"
+                                        navController.navigate(route)
                                     }
+
                                     UserType.DELIVERY_DRIVER -> {
                                         Toast.makeText(context, "Chức năng dành cho người giao hàng chưa có.", Toast.LENGTH_SHORT).show()
                                     }

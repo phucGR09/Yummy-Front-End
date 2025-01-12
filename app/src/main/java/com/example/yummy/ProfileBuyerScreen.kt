@@ -1,5 +1,5 @@
 package com.example.yummy
-
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,6 +19,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import com.example.yummy.viewmodel.AuthenticationViewModel
+import com.example.yummy.models.YeuCauHoanThanhKhachHang
+
+import com.example.yummy.viewmodel.AuthenticationViewModelFactory
+import com.example.yummy.api.AuthenticationApi
 
 @Composable
 fun ProfileBuyerScreen(
@@ -27,12 +37,16 @@ fun ProfileBuyerScreen(
     email: String,
     phoneNumber: String,
     address: String,
-    onSave: (String, String, String, String) -> Unit
+    onSave: (String, String, String, String) -> Unit,
+    viewModel: AuthenticationViewModel = viewModel(
+        factory = AuthenticationViewModelFactory(AuthenticationApi.create())
+    )
 ) {
     var updatedFullName by remember { mutableStateOf(fullName) }
     var updatedEmail by remember { mutableStateOf(email) }
     var updatedPhoneNumber by remember { mutableStateOf(phoneNumber) }
     var updatedAddress by remember { mutableStateOf(address) }
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -106,12 +120,26 @@ fun ProfileBuyerScreen(
 
         Button(
             onClick = {
-                onSave(updatedFullName, updatedEmail, updatedPhoneNumber, updatedAddress)
+                viewModel.completeCustomer(
+                    YeuCauHoanThanhKhachHang(
+                        address = updatedAddress,
+                        username = username
+                    )
+                ) { response ->
+                    if (response.code == 200) {
+                        Toast.makeText(context, "Tạo khách hàng thành công!", Toast.LENGTH_SHORT).show()
+                        Log.d("CustomerCreation", "Customer creation successful: ${response.result}")
+                    } else {
+                        Toast.makeText(context, "Lỗi: ${response.message}", Toast.LENGTH_SHORT).show()
+                        Log.e("CustomerCreationError", "Error creating customer: Code=${response.code}, Message=${response.message}")
+                    }
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("LƯU")
         }
+
     }
 }
 

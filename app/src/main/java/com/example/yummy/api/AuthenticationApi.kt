@@ -14,6 +14,15 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface AuthenticationApi {
+    @POST("api/v1/auth/complete/customer")
+    fun makeCustomer(@Body request: YeuCauHoanThanhKhachHang): Call<ApiResponse<KhachHangResult>>
+
+    @POST("api/v1/admin/restaurants/create")
+    fun makeRestaurant(@Body request: YeuCauTaoNhaHang): Call<ApiResponse<ChiTietNhaHang>>
+
+
+
+
 
     @POST("api/v1/auth/register")
     fun register(@Body request: RegisterRequest): Call<ApiResponse<UserResponse>>
