@@ -17,7 +17,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.yummy.api.MenuItemApi
 import com.example.yummy.ui.theme.YummyTheme
+import com.example.yummy.viewmodel.MenuItemViewModel
+import com.example.yummy.viewmodel.MenuItemViewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -145,7 +148,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable(
-                        "ProfileSellerScreen/{username}/{fullName}/{address}/{openingHours}/{taxCode}/{email}/{phoneNumber}",
+                        "ProfileSellerScreen/{username}/{fullName}/{address}/{openingHours}/{taxCode}/{email}/{phoneNumber}/{shopName}",
                         arguments = listOf(
                             navArgument("username") { type = NavType.StringType },
                             navArgument("fullName") { type = NavType.StringType },
@@ -153,7 +156,8 @@ class MainActivity : ComponentActivity() {
                             navArgument("openingHours") { type = NavType.StringType },
                             navArgument("taxCode") { type = NavType.StringType },
                             navArgument("email") { type = NavType.StringType },
-                            navArgument("phoneNumber") { type = NavType.StringType }
+                            navArgument("phoneNumber") { type = NavType.StringType },
+                            navArgument("shopName") { type = NavType.StringType } // Thêm tham số shopName
                         )
                     ) { backStackEntry ->
                         val username = backStackEntry.arguments?.getString("username") ?: ""
@@ -163,6 +167,7 @@ class MainActivity : ComponentActivity() {
                         val taxCode = backStackEntry.arguments?.getString("taxCode") ?: ""
                         val email = backStackEntry.arguments?.getString("email") ?: ""
                         val phoneNumber = backStackEntry.arguments?.getString("phoneNumber") ?: ""
+                        val shopName = backStackEntry.arguments?.getString("shopName") ?: "" // Lấy shopName từ arguments
 
                         ProfileSellerScreen(
                             username = username,
@@ -172,7 +177,8 @@ class MainActivity : ComponentActivity() {
                             taxCode = taxCode,
                             email = email,
                             phoneNumber = phoneNumber,
-                            onSave = { updatedFullName, updatedAddress, updatedOpeningHours, updatedTaxCode, updatedEmail, updatedPhoneNumber ->
+                            shopName = shopName, // Truyền shopName vào
+                            onSave = { updatedFullName, updatedAddress, updatedOpeningHours, updatedTaxCode, updatedEmail, updatedPhoneNumber, updatedShopName ->
                                 // Save the updated details
                                 saveUserDetails(
                                     context = this@MainActivity,
@@ -195,7 +201,35 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable("HomeScreen") {
-                        HomeScreen(navController = navController)
+                        HomeScreen(navController = navController, menuModel = menuModel)
+                    }
+                    composable(
+                        "foodDetail/{foodItemId}/{foodName}/{foodPrice}/{foodDescription}/{foodImagePath}",
+                        arguments = listOf(
+                            navArgument("foodItemId") { type = NavType.IntType },
+                            navArgument("foodName") { type = NavType.StringType },
+                            navArgument("foodPrice") { type = NavType.IntType },
+                            navArgument("foodDescription") { type = NavType.StringType },
+                            navArgument("foodImagePath") { type = NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        // Get arguments passed from navigation
+                        val foodItemId = backStackEntry.arguments?.getInt("foodItemId") ?: 0
+                        val foodName = backStackEntry.arguments?.getString("foodName") ?: ""
+                        val foodPrice = backStackEntry.arguments?.getInt("foodPrice") ?: 0
+                        val foodDescription = backStackEntry.arguments?.getString("foodDescription") ?: ""
+                        val foodImagePath = backStackEntry.arguments?.getString("foodImagePath") ?: ""
+
+                        // Pass the arguments to FoodDetail
+                        FoodDetail(
+                            foodItemId = foodItemId,
+                            foodName = foodName,
+                            foodPrice = foodPrice,
+                            foodDescription = foodDescription,
+                            foodImagePath = foodImagePath,
+                            onBackClicked = { navController.popBackStack() },
+                            navController = navController
+                        )
                     }
                     composable("CartScreen") {
                         CartScreen(

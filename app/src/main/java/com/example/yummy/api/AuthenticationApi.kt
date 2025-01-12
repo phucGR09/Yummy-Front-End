@@ -14,6 +14,15 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface AuthenticationApi {
+    @POST("api/v1/auth/complete/customer")
+    fun makeCustomer(@Body request: YeuCauHoanThanhKhachHang): Call<ApiResponse<KhachHangResult>>
+
+    @POST("api/v1/admin/restaurants/create")
+    fun makeRestaurant(@Body request: YeuCauTaoNhaHang): Call<ApiResponse<ChiTietNhaHang>>
+
+
+
+
 
     @POST("api/v1/auth/register")
     fun register(@Body request: RegisterRequest): Call<ApiResponse<UserResponse>>
@@ -30,7 +39,7 @@ interface AuthenticationApi {
     @POST("api/v1/auth/login")
     fun login(@Body request: AuthenticateRequest): Call<ApiResponse<AuthenticateResponse>>
     companion object {
-        private const val BASE_URL = "http://192.168.1.3:8080/" // Replace with your API base URL
+        private const val BASE_URL = "http://192.168.229.110:8080/" // Replace with your API base URL
 
         fun create(): AuthenticationApi {
             val client = OkHttpClient.Builder().build()

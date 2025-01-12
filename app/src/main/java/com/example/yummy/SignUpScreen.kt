@@ -166,10 +166,10 @@ fun SignUpScreen(
                 when {
                     username.isEmpty() || email.isEmpty() || fullName.isEmpty() || phone.isEmpty() ||
                             password.isEmpty() || confirmPassword.isEmpty() -> {
-                        Toast.makeText(context, "Please fill out all fields", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Vui lòng điền đầy đủ thông tin", Toast.LENGTH_SHORT).show()
                     }
                     selectedRole == null -> {
-                        Toast.makeText(context, "Please select a role", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Vui lòng chọn vai trò", Toast.LENGTH_SHORT).show()
                     }
                     password != confirmPassword -> {
                         Toast.makeText(context, "Mật khẩu không khớp", Toast.LENGTH_SHORT).show()
@@ -182,10 +182,10 @@ fun SignUpScreen(
                         ).show()
                     }
                     !isValidEmail(email) -> {
-                        Toast.makeText(context, "Enter a valid email address", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Vui lòng nhập email hợp lệ", Toast.LENGTH_SHORT).show()
                     }
                     !isValidPhoneNumber(phone) -> {
-                        Toast.makeText(context, "Enter a valid phone number", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Vui lòng nhập số điện thoại hợp lệ", Toast.LENGTH_SHORT).show()
                     }
                     else -> {
                         isLoading = true
@@ -202,7 +202,7 @@ fun SignUpScreen(
                         authenticationViewModel.registerUser(
                             request,
                             onSuccess = { userType ->
-                                Toast.makeText(context, "Gửi thành công", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Đăng ký thành công", Toast.LENGTH_SHORT).show()
                                 isLoading = false
 
                                 // Điều hướng dựa trên vai trò người dùng
@@ -212,14 +212,14 @@ fun SignUpScreen(
                                         navController.navigate(route)
                                     }
                                     UserType.RESTAURANT_OWNER -> {
-                                        val address = "default_address" // Giá trị mặc định
-                                        val openingHours = "18:00:00"
-                                        val taxCode = "default_tax_code"
-                                        val route = "ProfileSellerScreen/$username/$fullName/$address/$openingHours/$taxCode/$email/$phone/"
-                                        navController.navigate(
-                                            "ProfileSellerScreen/$username/$fullName/$address/$openingHours/$taxCode/$email/$phone"
-                                        )
+                                        val address = "" // Giá trị mặc định
+                                        val openingHours = ""
+                                        val taxCode = ""
+                                        val shopName = "" // Giá trị mặc định cho shopName
+                                        val route = "ProfileSellerScreen/$username/$fullName/$address/$openingHours/$taxCode/$email/$phone/$shopName"
+                                        navController.navigate(route)
                                     }
+
                                     UserType.DELIVERY_DRIVER -> {
                                         Toast.makeText(context, "Chức năng dành cho người giao hàng chưa có.", Toast.LENGTH_SHORT).show()
                                     }
@@ -230,8 +230,6 @@ fun SignUpScreen(
                                 isLoading = false
                             }
                         )
-
-
                     }
                 }
             },
@@ -240,15 +238,10 @@ fun SignUpScreen(
             if (isLoading) {
                 CircularProgressIndicator(color = Color.White, modifier = Modifier.size(18.dp))
             } else {
-                Text("Sign Up")
+                Text("Đăng ký")
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        TextButton(onClick = onSignInClick) {
-            Text("Đã có tài khoản? Đăng nhập")
-        }
     }
 }
 

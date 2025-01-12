@@ -1,6 +1,6 @@
 package com.example.yummy // Đổi thành package của bạn
 
-import android.content.Context
+import android.annotation.SuppressLint
 import androidx.compose.foundation.* // Đảm bảo các import cần thiết
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,47 +20,29 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.media3.common.util.Log
 import androidx.navigation.NavController
-import androidx.navigation.NavDeepLinkSaveStateControl
 import coil.compose.AsyncImage
-import com.example.yummy.api.MenuItemApi
-import com.example.yummy.response.MenuItemResponse
-import com.example.yummy.viewmodel.MenuItemViewModel
-import com.example.yummy.viewmodel.MenuItemViewModelFactory
-import java.util.Locale
-
-
+import kotlinx.coroutines.launch
+import coil.request.ImageRequest
+import coil.compose.AsyncImage
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController, menuModel: MenuModel) {
     var searchQuery by remember { mutableStateOf("") }
     val context = LocalContext.current
+
+    val dishes by menuModel.dishes.collectAsState(initial = emptyList())
+
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        scope.launch {
+            menuModel.getDishes()
+        }
+    }
     // Lấy SharedPreferences
-    val sharedPreferences = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
+    //val sharedPreferences = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
 
-    val menuApi = MenuItemApi.create()
-    val menuItemViewModel = viewModel<MenuItemViewModel>(
-        factory = MenuItemViewModelFactory(menuApi)
-    )
-
-    // Observe menu items
-    val menuItems by menuItemViewModel.menuItems.collectAsState(initial = null)
-
-    // Đọc giá trị auth_token và user_type
-    val authToken = sharedPreferences.getString("auth_token", null)
-    val userType = sharedPreferences.getString("user_type", null)
-
-    // Log giá trị auth_token và user_type
-    LaunchedEffect(Unit) {
-        Log.d("HomeScreen", "Auth Token: $authToken")
-        Log.d("HomeScreen", "User Type: $userType")
-    }
-    LaunchedEffect(Unit) {
-        // Gọi API lấy danh sách món ăn khi màn hình được hiển thị
-        menuItemViewModel.getAllMenuItems()
-    }
     Scaffold(
             modifier = Modifier.fillMaxSize(),
             bottomBar = {
@@ -112,7 +94,7 @@ fun HomeScreen(navController: NavController) {
                             style = MaterialTheme.typography.bodySmall
                         )
                         Text(
-                            text = "41, Nguyễn Văn Cừ, P4,\n Q5, TPHCM",
+                            text = "Your home",
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
@@ -205,34 +187,10 @@ fun HomeScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(8.dp))
             }
-
-            menuItems?.result?.let { menuItems ->
-                // Render menu items in two columns
-                items(menuItems.chunked(2)) { rowItems ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        rowItems.forEach { menuItem ->
-                            SuggestedFoodCard(
-                                menuItem = menuItem, // Truyền trực tiếp đối tượng MenuItemResponse
-                                navController = navController
-                            )
-                        }
-                    }
-                }
-            } ?: run {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
+            items(dishes) { dish ->
+                SuggestedFoodCard(menuItem = dish, navController = navController)
             }
+
         }
     }
 }
@@ -310,9 +268,10 @@ fun RestaurantCard(restaurant: Restaurant) {
         }
     }
 }
+@SuppressLint("DefaultLocale")
 @Composable
 fun SuggestedFoodCard(
-    menuItem: MenuItemResponse,
+    menuItem: Dish,
     navController: NavController
 ) {
     Card(
@@ -320,9 +279,9 @@ fun SuggestedFoodCard(
             .fillMaxWidth()
             .padding(8.dp)
             .clickable {
-                // Điều hướng tới màn hình chi tiết món ăn
+                // Navigate to the food detail screen with the proper information
                 navController.navigate(
-                    "foodDetail/${menuItem.name}/${menuItem.price}/${menuItem.description}/${menuItem.imageUrl}"
+                    "foodDetail/${menuItem.itemId}/${menuItem.name}/${menuItem.price}/${menuItem.description.orEmpty()}/${menuItem.imagePath.orEmpty()}"
                 )
             },
         shape = MaterialTheme.shapes.medium,
@@ -331,16 +290,20 @@ fun SuggestedFoodCard(
         Column(
             modifier = Modifier.padding(8.dp)
         ) {
-            // Hiển thị hình ảnh món ăn
+            // Display food image
             AsyncImage(
-                model = menuItem.imageUrl,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(menuItem.imagePath) // URL of the image
+                    .crossfade(true) // Optional: adds smooth transition effect
+                    .build(),
                 contentDescription = menuItem.name,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(150.dp) // Chiều cao cố định cho ảnh
+                    .height(150.dp) // Fixed height for the image
                     .clip(MaterialTheme.shapes.medium),
                 contentScale = ContentScale.Crop
             )
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -349,13 +312,15 @@ fun SuggestedFoodCard(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = menuItem.name,
+                        text = menuItem.name,  // Food name
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
+
+                    // Display the price, formatted as currency
                     Text(
-                        text = "$${menuItem.price.setScale(2).toPlainString()}",
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = menuItem.price.toString() + "$",  // Formats the price to 2 decimal places
+                        style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -363,6 +328,7 @@ fun SuggestedFoodCard(
         }
     }
 }
+
 
 data class FoodCategory(
     val name: String,

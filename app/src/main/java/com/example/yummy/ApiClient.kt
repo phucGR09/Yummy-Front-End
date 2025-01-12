@@ -40,7 +40,7 @@ class LocalDateTimeAdapter : JsonDeserializer<LocalDateTime>, JsonSerializer<Loc
 }
 
 object ApiClient {
-    private const val BASE_URL = "http://192.168.1.3:8080/api/v1/"  // Thay bằng địa chỉ IP backend
+    private const val BASE_URL = "http://192.168.229.110:8080/api/v1/"  // Thay bằng địa chỉ IP backend
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY

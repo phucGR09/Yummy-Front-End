@@ -136,4 +136,45 @@ class AuthenticationViewModel(private val authenticationApi: AuthenticationApi) 
             }
         })
     }
+    fun completeCustomer(request: YeuCauHoanThanhKhachHang, onResult: (ApiResponse<KhachHangResult>) -> Unit) {
+        authenticationApi.makeCustomer(request).enqueue(object : Callback<ApiResponse<KhachHangResult>> {
+            override fun onResponse(
+                call: Call<ApiResponse<KhachHangResult>>,
+                response: Response<ApiResponse<KhachHangResult>>
+            ) {
+                if (response.isSuccessful) {
+                    val apiResponse = response.body()
+                    Log.d("API_SUCCESS", "Response: $apiResponse")
+                    onResult(apiResponse ?: ApiResponse(code = 500, message = "Response body is null"))
+                } else {
+                    Log.e("API_ERROR", "Error Code: ${response.code()}, Message: ${response.errorBody()?.string()}")
+                    onResult(ApiResponse(code = response.code(), message = response.message()))
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse<KhachHangResult>>, t: Throwable) {
+                Log.e("API_FAILURE", "Error: ${t.localizedMessage}")
+                onResult(ApiResponse(code = 500, message = t.localizedMessage ?: "Unknown Error"))
+            }
+        })
+    }
+    fun taoNhaHang(request: YeuCauTaoNhaHang, onResult: (ApiResponse<ChiTietNhaHang>) -> Unit) {
+        authenticationApi.makeRestaurant(request).enqueue(object : Callback<ApiResponse<ChiTietNhaHang>> {
+            override fun onResponse(call: Call<ApiResponse<ChiTietNhaHang>>, response: Response<ApiResponse<ChiTietNhaHang>>) {
+                if (response.isSuccessful) {
+                    onResult(response.body() ?: ApiResponse(code = 500, message = "Response body is null"))
+                } else {
+                    val errorMessage = response.errorBody()?.string() ?: "Unknown error"
+                    onResult(ApiResponse(code = response.code(), message = errorMessage))
+                }
+            }
+
+            override fun onFailure(call: Call<ApiResponse<ChiTietNhaHang>>, t: Throwable) {
+                onResult(ApiResponse(code = 500, message = t.localizedMessage ?: "Unknown error"))
+            }
+        })
+    }
+
+
+
 }

@@ -42,7 +42,7 @@ interface MenuItemApi {
     fun updateMenuItem(@Body request: MenuItemUpdationRequest): Call<ApiResponse<MenuItemResponse>>
 
     companion object {
-        private const val BASE_URL = "http://192.168.1.3:8080/" // Thay bằng URL của bạn
+        private const val BASE_URL = "http://192.168.229.110:8080/" // Thay bằng URL của bạn
 
         fun create(): MenuItemApi {
             val client = OkHttpClient.Builder().build()

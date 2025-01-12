@@ -228,6 +228,35 @@ class MenuModel {
     suspend fun updateImage(dish: Dish, uploadedUrl: String){
 
     }
+
+    suspend fun searchDishByName(name: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = apiService.getMenuItemsByContainedDishName(name)
+                if (response.isSuccessful) {
+                    val dishesFromServer = response.body()?.result?.map { menuItem ->
+                        Dish(
+                            itemId = menuItem.id,
+                            restaurantId = menuItem.restaurant.id,
+                            name = menuItem.name,
+                            price = menuItem.price.toInt(),
+                            description = menuItem.description,
+                            imagePath = menuItem.imageUrl
+                        )
+                    }.orEmpty()
+                    _dishes.value = dishesFromServer
+                    println("Tìm kiếm món ăn thành công")
+                    return@withContext true
+                } else {
+                    println("Tìm kiếm món ăn thất bại: ${response.message()}")
+                    return@withContext false
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return@withContext false
+            }
+        }
+    }
 }
 
 
