@@ -202,6 +202,9 @@ class MainActivity : ComponentActivity() {
                     composable("HomeScreen") {
                         HomeScreen(navController = navController, menuModel = menuModel)
                     }
+                    composable("SearchDishScreen") {
+                        SearchDishScreen(menuModel = menuModel, onBack = { navController.popBackStack() }) // Điều hướng trở về)
+                    }
                     composable(
                         "foodDetail/{foodItemId}/{foodName}/{foodPrice}/{foodDescription}/{foodImagePath}",
                         arguments = listOf(

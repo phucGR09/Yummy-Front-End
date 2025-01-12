@@ -34,30 +34,54 @@ import coil.compose.rememberImagePainter
 import kotlinx.coroutines.launch
 
 @Composable
-fun SearchDishScreen(menuModel: MenuModel) {
+fun SearchDishScreen(menuModel: MenuModel, onBack: () -> Unit) {
     val searchQuery = remember { mutableStateOf("") }
     val dishes by menuModel.dishes.collectAsState()
     val coroutineScope = rememberCoroutineScope()
-    Column(modifier = Modifier.padding(16.dp)) {
-        // Tìm kiếm món ăn theo tên
-        TextField(
-            value = searchQuery.value,
-            onValueChange = { newQuery ->
-                searchQuery.value = newQuery
-                // Gọi hàm tìm kiếm khi người dùng nhập
-                if (newQuery.isNotEmpty()) {
-                    coroutineScope.launch {
-                        menuModel.searchDishByName(newQuery)
-                    }
-                }
-            },
-            label = { Text("Tìm kiếm món ăn") },
+    Column(modifier = Modifier.padding(16.dp).padding(top = 20.dp)) {
+        // Nút "Back"
+        androidx.compose.material3.Button(
+            onClick = onBack, // Gọi hàm điều hướng trở về
+            modifier = Modifier.height(40.dp) // Chiều cao nút nhỏ gọn
+        ) {
+            Text("Back")
+        }
+
+        // Row chứa TextField và Button "Find"
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
-        )
+        ) {
+            // TextField để nhập nội dung tìm kiếm
+            TextField(
+                value = searchQuery.value,
+                onValueChange = { newQuery -> searchQuery.value = newQuery },
+                label = { Text("Tìm kiếm món ăn") },
+                modifier = Modifier.weight(1f) // Chiếm toàn bộ không gian trống còn lại
+            )
+
+            Spacer(modifier = Modifier.width(8.dp)) // Khoảng cách giữa TextField và Button
+
+            // Button "Find"
+            androidx.compose.material3.Button(
+                onClick = {
+                    // Chỉ thực hiện tìm kiếm khi nhấn vào nút "Find"
+                    if (searchQuery.value.isNotEmpty()) {
+                        coroutineScope.launch {
+                            menuModel.searchDishByName(searchQuery.value)
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .height(56.dp) // Cùng chiều cao với TextField
+            ) {
+                Text("Find")
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Hiển thị các món ăn tìm được
+        // Hiển thị danh sách món ăn tìm được
         LazyColumn {
             items(dishes) { dish ->
                 DishRow(dish = dish)

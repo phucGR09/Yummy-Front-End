@@ -134,7 +134,12 @@ fun HomeScreen(navController: NavController, menuModel: MenuModel) {
                     onQueryChange = { searchQuery = it },
                     onSearch = {},
                     active = false,
-                    onActiveChange = {},
+                    onActiveChange = {isActive ->
+                        if (isActive) {
+                            // Điều hướng đến SearchDishScreen ngay khi search bar được kích hoạt
+                            navController.navigate("SearchDishScreen")
+                        }
+                                     },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("Find for food or restaurant...") },
                     leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") }
