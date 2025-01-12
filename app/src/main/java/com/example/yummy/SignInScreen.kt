@@ -107,12 +107,6 @@ fun SignInScreen(
         }
     }
 
-    // Hiển thị thông báo lỗi nếu có
-    LaunchedEffect(loginResult) {
-        if (loginResult == null) {
-            errorMessage = "Login failed. Please try again."
-        }
-    }
 
     Column(
         modifier = Modifier

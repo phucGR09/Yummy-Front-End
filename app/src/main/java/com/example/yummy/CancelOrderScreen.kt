@@ -25,26 +25,26 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewCancelOrderScreen() {
-    val navController = rememberNavController()
-    val orderModel= OrderModel()
-    val viewModel = OrderSellerViewModel(orderModel)
-
-
-    // Hiển thị màn hình thêm món ăn
-    CancelOrderScreen(1,navController = navController,onCancelOrder = { id, reason ->
-        viewModel.rejectOrderWithReason(id, reason)
-    })
-
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun PreviewCancelOrderScreen() {
+//    val navController = rememberNavController()
+//    val orderModel= OrderModel()
+//    val viewModel = OrderSellerViewModel(orderModel)
+//
+//
+//    // Hiển thị màn hình thêm món ăn
+//    CancelOrderScreen(1,navController = navController,onCancelOrder = { id, reason ->
+//        viewModel.rejectOrderWithReason(id, reason)
+//    })
+//
+//}
 
 @Composable
 fun CancelOrderScreen(
     orderId: Int,
     navController: NavController,
-    onCancelOrder: (Int, String) -> Unit
+    viewModel: OrderSellerViewModel // Thêm tham số này
 ) {
     var selectedReason by remember { mutableStateOf("") }
     var customReason by remember { mutableStateOf("") }
@@ -142,7 +142,13 @@ fun CancelOrderScreen(
         Button(
             onClick = {
                 val finalReason = if (selectedReason == "Lý do khác") customReason else selectedReason
-                onCancelOrder(orderId, finalReason)
+                viewModel.cancelOrderWithReason(orderId, finalReason) { success ->
+                    if (success) {
+                        println("Hủy đơn hàng thành công: Mã đơn #$orderId với lý do: $finalReason")
+                    } else {
+                        println("Hủy đơn hàng thất bại: Mã đơn #$orderId")
+                    }
+                }
                 navController.popBackStack()
             },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5722)),
@@ -154,4 +160,5 @@ fun CancelOrderScreen(
         }
     }
 }
+
 

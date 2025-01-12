@@ -22,12 +22,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-
 
 
 
@@ -233,6 +233,10 @@ class MainActivity : ComponentActivity() {
                     composable("customer_reviews") { ReviewScreen(navController,reviewviewModel) }
                     composable("menu") { MenuSeller(navController,MenuSellerviewModel) }
                     composable("orders") { OrderSellerScreen(navController,OrderSellerviewModel) }
+                    composable("history_orders") {
+                        HistoryOrdersScreen(navController = navController, viewModel = OrderSellerviewModel)
+                    }
+
                     composable("revenue") { AvenueSellerScreen(navController,AvenueSellerviewModel) }
                     composable(  "addDish") { AddDishScreen(navController,MenuSellerviewModel)}
                     composable("editDish/{dishName}") { backStackEntry ->
@@ -263,9 +267,7 @@ class MainActivity : ComponentActivity() {
                             CancelOrderScreen(
                                 navController = navController,
                                 orderId = orderId,
-                                onCancelOrder = { id, reason ->
-                                    OrderSellerviewModel.rejectOrderWithReason(id, reason)
-                                }
+                                viewModel=OrderSellerviewModel
                             )
                         }
                     }

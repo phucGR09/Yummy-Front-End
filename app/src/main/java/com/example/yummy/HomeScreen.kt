@@ -31,6 +31,7 @@ import com.example.yummy.viewmodel.MenuItemViewModel
 import com.example.yummy.viewmodel.MenuItemViewModelFactory
 import java.util.Locale
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController) {

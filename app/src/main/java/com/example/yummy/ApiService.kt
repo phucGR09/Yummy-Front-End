@@ -14,6 +14,17 @@
     import java.time.LocalTime
 
 
+    data class OrderUpdateRequest(
+        val id: Int,
+        val restaurantId: Int,
+        val driverUsername: String? = null,
+        val customerUsername: String? = null,
+        val orderTime: String,
+        val totalPrice: Double,
+        val status: String
+    )
+
+
     data class CreateMenuItemRequest(
         val name: String ="",
         val price: Double = 0.0,
@@ -48,6 +59,44 @@
         val code: Int,
         val message: String,
         val result: List<MenuItemResult>
+
+    )
+
+    data class UpdateOrderResponse(
+        val code: Int,
+        val message: String?,
+        val result: OrderDetails // Chứa thông tin chi tiết của đơn hàng sau khi cập nhật
+    )
+
+
+    data class OrderResponse(
+        val code: Int,
+        val message: String,
+        val result: List<OrderDetails>
+    )
+
+    data class OrderDetails(
+        val id: Int,
+        val restaurant: RestaurantDetails,
+        val driver: DriverDetails?,
+        val customer: CustomerDetails,
+        val orderTime: LocalDateTime, // Đổi sang LocalDateTime
+        val totalPrice: Double,
+        val status: String
+    )
+
+    data class DriverDetails(
+        val id: Int,
+        val avatarUrl: String?,
+        val licensePlate: String,
+        val identityNumber: String,
+        val user: UserDetails
+    )
+
+    data class CustomerDetails(
+        val id: Int,
+        val address: String,
+        val user: UserDetails
     )
 
     data class MenuItemResult(
@@ -113,4 +162,11 @@
         @GET("admin/menu-items/restaurant-id")
         suspend fun getMenuItemByRestaurantId(@Query("id") id: Int) : Response<MenuItemsResponse>
 
+        @GET("admin/orders/restaurant-id")
+        suspend fun getOrdersByRestaurantId(
+            @Query("restaurant-id") restaurantId: Int
+        ): Response<OrderResponse>
+
+        @PATCH("admin/orders/update")
+        suspend fun updateOrder(@Body order: OrderUpdateRequest): Response<UpdateOrderResponse>
     }
