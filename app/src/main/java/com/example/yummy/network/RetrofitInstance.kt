@@ -5,7 +5,6 @@ import com.example.yummy.api.UserApi
 import com.example.yummy.api.RestaurantApi
 import com.example.yummy.viewmodel.AuthInterceptor
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -15,12 +14,8 @@ object RetrofitInstance {
 
     // Tạo Retrofit instance
     private val retrofit by lazy {
-
         // Tạo OkHttpClient với AuthInterceptor
         val okHttpClient = OkHttpClient.Builder()
-            .addInterceptor(HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
-            }) // Logging request và response
             .addInterceptor(AuthInterceptor())  // Sử dụng AuthInterceptor để tự động thêm token vào header
             .build()
 
