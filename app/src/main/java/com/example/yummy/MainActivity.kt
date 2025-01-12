@@ -202,6 +202,34 @@ class MainActivity : ComponentActivity() {
                     composable("HomeScreen") {
                         HomeScreen(navController = navController, menuModel = menuModel)
                     }
+                    composable(
+                        "foodDetail/{foodItemId}/{foodName}/{foodPrice}/{foodDescription}/{foodImagePath}",
+                        arguments = listOf(
+                            navArgument("foodItemId") { type = NavType.IntType },
+                            navArgument("foodName") { type = NavType.StringType },
+                            navArgument("foodPrice") { type = NavType.IntType },
+                            navArgument("foodDescription") { type = NavType.StringType },
+                            navArgument("foodImagePath") { type = NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        // Get arguments passed from navigation
+                        val foodItemId = backStackEntry.arguments?.getInt("foodItemId") ?: 0
+                        val foodName = backStackEntry.arguments?.getString("foodName") ?: ""
+                        val foodPrice = backStackEntry.arguments?.getInt("foodPrice") ?: 0
+                        val foodDescription = backStackEntry.arguments?.getString("foodDescription") ?: ""
+                        val foodImagePath = backStackEntry.arguments?.getString("foodImagePath") ?: ""
+
+                        // Pass the arguments to FoodDetail
+                        FoodDetail(
+                            foodItemId = foodItemId,
+                            foodName = foodName,
+                            foodPrice = foodPrice,
+                            foodDescription = foodDescription,
+                            foodImagePath = foodImagePath,
+                            onBackClicked = { navController.popBackStack() },
+                            navController = navController
+                        )
+                    }
                     composable("CartScreen") {
                         CartScreen(
                             cartItems = cartItems,

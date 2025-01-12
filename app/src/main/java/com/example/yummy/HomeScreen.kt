@@ -1,5 +1,6 @@
 package com.example.yummy // Đổi thành package của bạn
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.* // Đảm bảo các import cần thiết
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,7 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
-
+import coil.request.ImageRequest
+import coil.compose.AsyncImage
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController, menuModel: MenuModel) {
@@ -92,7 +94,7 @@ fun HomeScreen(navController: NavController, menuModel: MenuModel) {
                             style = MaterialTheme.typography.bodySmall
                         )
                         Text(
-                            text = "41, Nguyễn Văn Cừ, P4,\n Q5, TPHCM",
+                            text = "Your home",
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
@@ -266,6 +268,7 @@ fun RestaurantCard(restaurant: Restaurant) {
         }
     }
 }
+@SuppressLint("DefaultLocale")
 @Composable
 fun SuggestedFoodCard(
     menuItem: Dish,
@@ -278,7 +281,7 @@ fun SuggestedFoodCard(
             .clickable {
                 // Navigate to the food detail screen with the proper information
                 navController.navigate(
-                    "foodDetail/${menuItem.name}/${menuItem.price}/${menuItem.description}/${menuItem.imagePath}"
+                    "foodDetail/${menuItem.itemId}/${menuItem.name}/${menuItem.price}/${menuItem.description.orEmpty()}/${menuItem.imagePath.orEmpty()}"
                 )
             },
         shape = MaterialTheme.shapes.medium,
@@ -289,7 +292,10 @@ fun SuggestedFoodCard(
         ) {
             // Display food image
             AsyncImage(
-                model = menuItem.imagePath,  // Assuming menuItem.imageUrl is a valid image URL or path
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(menuItem.imagePath) // URL of the image
+                    .crossfade(true) // Optional: adds smooth transition effect
+                    .build(),
                 contentDescription = menuItem.name,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -313,8 +319,8 @@ fun SuggestedFoodCard(
 
                     // Display the price, formatted as currency
                     Text(
-                        text = String.format("$%.2f", menuItem.price),  // Formats the price to 2 decimal places
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = menuItem.price.toString() + "$",  // Formats the price to 2 decimal places
+                        style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }

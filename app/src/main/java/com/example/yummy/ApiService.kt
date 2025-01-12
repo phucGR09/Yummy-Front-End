@@ -1,5 +1,7 @@
     package com.example.yummy
 
+    import com.example.yummy.models.ApiResponse
+    import com.example.yummy.response.MenuItemResponse
     import retrofit2.http.Body
     import retrofit2.http.POST
     import retrofit2.Call // Đây là lớp cơ bản để định nghĩa các API call trong Retrofit
@@ -113,4 +115,6 @@
         @GET("admin/menu-items/restaurant-id")
         suspend fun getMenuItemByRestaurantId(@Query("id") id: Int) : Response<MenuItemsResponse>
 
+        @GET("api/v1/admin/menu-items/contained-dish-name/name")
+        suspend fun getMenuItemsByContainedDishName(@Query("name") name: String): Response<MenuItemsResponse>
     }

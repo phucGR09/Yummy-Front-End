@@ -24,12 +24,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,19 +40,21 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FoodDetail (
-    onBackClicked: () -> Unit,
-    foodImage: Int,
+fun FoodDetail(
+    foodItemId: Int,
     foodName: String,
-    foodPrice: Double,
+    foodPrice: Int,
     foodDescription: String,
-    cartItems: List<CartItem>, // Nhận trạng thái giỏ hàng
-    updateCartItems: (List<CartItem>) -> Unit, // Hàm cập nhật trạng thái
+    foodImagePath: String,
+    onBackClicked: () -> Unit,
     navController: NavController
 ) {
+    // Convert image path to a drawable resource (if applicable)
+
     var quantity by remember { mutableIntStateOf(1) }
     var showDialog by remember { mutableStateOf(false) }
     var isFavorite by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -57,7 +62,7 @@ fun FoodDetail (
                 navigationIcon = {
                     IconButton(onClick = onBackClicked) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_back), // Đổi icon back phù hợp
+                            painter = painterResource(id = R.drawable.ic_back),
                             contentDescription = "Back",
                         )
                     }
@@ -68,17 +73,17 @@ fun FoodDetail (
                         horizontalArrangement = Arrangement.End
                     ) {
                         IconButton(onClick = {
-                            isFavorite = !isFavorite // Đảo ngược trạng thái yêu thích
+                            isFavorite = !isFavorite // Toggle favorite state
                         }) {
                             Icon(
-                                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder, // Chuyển đổi giữa Favorite và FavoriteBorder
+                                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                 contentDescription = "Favorite",
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
-                        IconButton(onClick = { navController.navigate("CartScreen")  }) {
+                        IconButton(onClick = { navController.navigate("CartScreen") }) {
                             Icon(
-                                imageVector = Icons.Default.ShoppingCart, // Icon giỏ hàng
+                                imageVector = Icons.Default.ShoppingCart,
                                 contentDescription = "Cart",
                                 tint = MaterialTheme.colorScheme.primary
                             )
@@ -94,33 +99,29 @@ fun FoodDetail (
                     .fillMaxSize()
                     .padding(paddingValues)
                     .padding(16.dp),
-                //horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Hình ảnh món ăn
+                // Image
                 item {
-
-                    Image(
-                        painter = painterResource(id = foodImage),
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(foodImagePath) // URL of the image
+                            .crossfade(true) // Optional: adds smooth transition effect
+                            .build(),
                         contentDescription = foodName,
                         modifier = Modifier
-                            .height(250.dp)
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(16.dp)),
+                            .height(200.dp) // Fixed height for the image
+                            .clip(MaterialTheme.shapes.medium),
                         contentScale = ContentScale.Crop
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
+
+                // Food details
                 item {
-
-
-                    // Tên món ăn
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                    ) {
+                    Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                         Row(
-                            horizontalArrangement = Arrangement.SpaceBetween, // Cách đều nhau
+                            horizontalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -130,27 +131,25 @@ fun FoodDetail (
                                 fontSize = 24.sp,
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Start,
-                                modifier = Modifier.weight(1f) // Chiếm không gian còn lại
+                                modifier = Modifier.weight(1f)
                             )
-                            //Spacer(modifier = Modifier.height(8.dp))
 
-                            // Giá món ăn
+                            // Price
                             Text(
-                                text = "$${String.format(Locale.US, "%.2f", foodPrice)}",
+                                text = "$foodPrice$",
                                 fontSize = 30.sp,
-                                color = Color(0xFF4CAF50), // Màu xanh lá cây
+                                color = Color(0xFF4CAF50),
                                 fontWeight = FontWeight.SemiBold,
                                 textAlign = TextAlign.End,
-                                modifier = Modifier
-                                    .wrapContentWidth(Alignment.End) // Canh phải
+                                modifier = Modifier.wrapContentWidth(Alignment.End)
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                         }
                     }
                 }
+
+                // Quantity control
                 item {
-
-
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -158,20 +157,16 @@ fun FoodDetail (
                         horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Nút giảm
-                        IconButton(
-                            onClick = { if (quantity > 1) quantity-- } // Không giảm dưới 1
-                        ) {
+                        // Decrease button
+                        IconButton(onClick = { if (quantity > 1) quantity-- }) {
                             Surface(
-                                shape = CircleShape, // Hình tròn
-                                color = MaterialTheme.colorScheme.primary, // Màu từ theme
-                                modifier = Modifier.size(30.dp) // Kích thước hình tròn
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(30.dp)
                             ) {
-                                Box(
-                                    contentAlignment = Alignment.Center // Đặt Icon vào giữa
-                                ) {
+                                Box(contentAlignment = Alignment.Center) {
                                     Icon(
-                                        imageVector = Icons.Default.KeyboardArrowDown, // Icon giỏ hàng
+                                        imageVector = Icons.Default.KeyboardArrowDown,
                                         contentDescription = "Decrease quantity",
                                         tint = Color.White
                                     )
@@ -187,20 +182,16 @@ fun FoodDetail (
                         )
                         Spacer(modifier = Modifier.height(4.dp))
 
-                        // nút tăng
-                        IconButton(
-                            onClick = { quantity++ }
-                        ) {
+                        // Increase button
+                        IconButton(onClick = { quantity++ }) {
                             Surface(
-                                shape = CircleShape, // Hình tròn
-                                color = MaterialTheme.colorScheme.primary, // Màu từ theme
-                                modifier = Modifier.size(30.dp) // Kích thước hình tròn
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(30.dp)
                             ) {
-                                Box(
-                                    contentAlignment = Alignment.Center // Đặt Icon vào giữa
-                                ) {
+                                Box(contentAlignment = Alignment.Center) {
                                     Icon(
-                                        imageVector = Icons.Default.KeyboardArrowUp, // Icon giỏ hàng
+                                        imageVector = Icons.Default.KeyboardArrowUp,
                                         contentDescription = "Increase quantity",
                                         tint = Color.White
                                     )
@@ -210,8 +201,9 @@ fun FoodDetail (
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                 }
+
+                // Description
                 item {
-                    // Mô tả món ăn
                     Text(
                         text = foodDescription,
                         fontSize = 16.sp,
@@ -220,35 +212,25 @@ fun FoodDetail (
                     )
                 }
             }
-            // Nút "Add to Cart" cố định
+
+            // Add to Cart button
             Button(
                 onClick = {
-                    val newItem = CartItem(
-                        id = "${cartItems.size + 1}", // Tạo ID mới
-                        name = foodName,
-                        image = foodImage,
-                        price = foodPrice,
-                        quantity = quantity
-                    )
 
-                    // Tạo danh sách mới bằng cách thêm sản phẩm mới
-                    val updatedCartItems = cartItems.toMutableList().apply { add(newItem) }
-                    updateCartItems(updatedCartItems) // Cập nhật danh sách
-                    // Hiển thị thông báo
-                    showDialog = true
                 },
                 modifier = Modifier
                     .width(250.dp)
                     .height(100.dp)
-                    .padding(bottom = 40.dp) // Thêm khoảng cách với đáy màn hình
-                    .align(Alignment.BottomCenter), // Cố định nút ở dưới cùng
+                    .padding(bottom = 40.dp)
+                    .align(Alignment.BottomCenter),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Row(){
+                Row() {
                     Icon(
-                        imageVector = Icons.Default.Add, // Icon giỏ hàng
+                        imageVector = Icons.Default.Add,
                         contentDescription = "Cart",
-                        tint = Color.White)
+                        tint = Color.White
+                    )
                     Text(
                         text = "Add to card",
                         color = Color.White,
@@ -256,8 +238,9 @@ fun FoodDetail (
                         modifier = Modifier.padding(start = 10.dp)
                     )
                 }
-
             }
+
+            // Dialog after adding to cart
             if (showDialog) {
                 AlertDialog(
                     onDismissRequest = { showDialog = false },
@@ -265,9 +248,7 @@ fun FoodDetail (
                         Text(text = "$foodName has been added to the cart")
                     },
                     confirmButton = {
-                        Button(
-                            onClick = { showDialog = false }
-                        ) {
+                        Button(onClick = { showDialog = false }) {
                             Text("OK")
                         }
                     },
